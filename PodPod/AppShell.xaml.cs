@@ -105,7 +105,7 @@ public partial class AppShell : Shell
         if (index < Playlist.Count - 1)
         {
             CurrentEpisode = Playlist[index + 1];
-            Player.Source = CurrentEpisode.Path;
+            Player.Source = CurrentEpisode.MediaURL;
             Player.Play();
             UpdatePlayList();
         }
@@ -202,7 +202,7 @@ public partial class AppShell : Shell
             MediaElement player = shell.GetPlayer();
             shell.CurrentEpisodeList = Playlist;//
             shell.CurrentEpisode = episode;
-            player.Source = episode?.Path;
+            player.Source = episode?.MediaURL;
             player.Play();
 
             Label episodeDetails = shell.GetEpisodeDetails();

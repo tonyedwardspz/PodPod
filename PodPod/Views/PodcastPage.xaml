@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="PodPod.Views.LibraryPage"
-             Title="LibraryPage">
+             x:Class="PodPod.Views.PodcastPage"
+             Title="PodcastPage">
     <ScrollView>
         
         <CollectionView 
-            ItemsSource="{Binding Podcasts}"
+            ItemsSource="{Binding Episodes}"
             SelectionMode="Single"
-            SelectionChanged="Podcast_SelectionChanged" >
+            SelectionChanged="Episode_SelectionChanged" >
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Grid Padding="10">

@@ -11,6 +11,7 @@ public partial class App : Application
 		MainPage = new AppShell();
 
 		Routing.RegisterRoute("library-page", typeof(LibraryPage));
+		Routing.RegisterRoute(nameof(PodcastPage), typeof(PodcastPage));
 	}
 }
 

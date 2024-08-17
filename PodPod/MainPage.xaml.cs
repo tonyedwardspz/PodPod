@@ -67,7 +67,6 @@ public partial class MainPage : ContentPage
                             }
                         }
                     }
-
                 }
             }
         } catch (Exception e)
