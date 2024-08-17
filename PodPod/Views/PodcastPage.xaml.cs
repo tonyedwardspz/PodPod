@@ -9,7 +9,7 @@ namespace PodPod.Views;
 [QueryProperty(nameof(Podcast), nameof(Podcast))]
 public partial class PodcastPage : ContentPage
 {
-	private ObservableCollection<Episode> episodes;
+	private ObservableCollection<Episode> episodes = new ObservableCollection<Episode>();
 	public ObservableCollection<Episode> Episodes
 	{
 		get { return episodes; }
@@ -20,7 +20,17 @@ public partial class PodcastPage : ContentPage
 		}
 	}
 
-	public Podcast Podcast { get; set; }
+	private Podcast podcast;
+	public Podcast Podcast
+	{
+		get { return podcast; }
+		set
+		{
+			podcast = value;
+			OnPropertyChanged(nameof(Podcast));
+		}
+	}
+
 	public PodcastPage()
 	{
 		InitializeComponent();
@@ -32,12 +42,19 @@ public partial class PodcastPage : ContentPage
 		base.OnAppearing();
 		Debug.WriteLine("Podcast Page Appearing");
 		Debug.WriteLine($"Podcast: {Podcast.Title}");
-		this.Title = $"{Podcast.Title} series page";
+		this.Title = $"{Podcast.Title}";
 
-		var factory = new HttpFeedFactory();
+		
+	}
+
+	protected override void OnNavigatedTo(NavigatedToEventArgs e)
+    {
+		Debug.WriteLine("Navigated to");
+        base.OnNavigatedTo(e);
+
+        var factory = new HttpFeedFactory();
         var feed = factory.CreateFeed(new Uri(Podcast.FeedUrl));
 
-		Episodes = new ObservableCollection<Episode>();
         foreach (var item in feed.Items)
         {
             Episodes.Add(new Episode
@@ -48,7 +65,9 @@ public partial class PodcastPage : ContentPage
 				Published = item.DatePublished
 			});
         }
-	}
+
+		EpisodeCount.Text = $"Episodes: {Episodes.Count}";
+    }
 
 	public void Episode_SelectionChanged(object sender, SelectionChangedEventArgs e)
 	{

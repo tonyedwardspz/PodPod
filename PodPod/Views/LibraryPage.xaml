@@ -8,7 +8,10 @@
         <CollectionView 
             ItemsSource="{Binding Podcasts}"
             SelectionMode="Single"
-            SelectionChanged="Podcast_SelectionChanged" >
+            SelectionChanged="Podcast_SelectionChanged" 
+            SelectedItem="{Binding SelectedPodcast}"
+            EmptyView="Loading Podcasts"
+            >
 
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Orientation="Vertical" Span="4" />

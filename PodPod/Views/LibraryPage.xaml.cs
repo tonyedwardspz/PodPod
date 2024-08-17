@@ -9,12 +9,18 @@ namespace PodPod.Views;
 public partial class LibraryPage : ContentPage
 {
 	public ObservableCollection<Podcast> Podcasts { get; set; } = new ObservableCollection<Podcast>();
-	internal Podcast selectedPodcast;
+	 Podcast? selectedPodcast;
 
 	public LibraryPage()
 	{
 		InitializeComponent();
 		BindingContext = this;
+	}
+
+	protected override void OnNavigatedTo(NavigatedToEventArgs e)
+    {
+		Debug.WriteLine("Navigated to");
+        base.OnNavigatedTo(e);
 		PrepPodcasts();
 	}
 
