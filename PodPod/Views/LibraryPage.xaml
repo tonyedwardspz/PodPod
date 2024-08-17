@@ -9,14 +9,31 @@
             ItemsSource="{Binding Podcasts}"
             SelectionMode="Single"
             SelectionChanged="Podcast_SelectionChanged" >
+
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="4" />
+            </CollectionView.ItemsLayout>
+
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Padding="10">
+                    <StackLayout Padding="10,0"
+                        MaximumWidthRequest="250"
+                        VerticalOptions="Center" >
 
-                        <StackLayout Padding="10,0">
-                            <Label Text="{Binding Title}" FontSize="18" />
-                        </StackLayout>
-                    </Grid>
+                        <Image Source="{Binding Cover}" 
+                            MaximumHeightRequest="250" 
+                            MaximumWidthRequest="250"
+                            Margin="0,0,0,10" 
+                              />
+
+                        <Label Text="{Binding Title}" 
+                            FontSize="16"
+                            MaximumWidthRequest="250"
+
+                            HorizontalOptions="CenterAndExpand"
+                            Margin="0,0,0,25" />
+
+                    </StackLayout>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

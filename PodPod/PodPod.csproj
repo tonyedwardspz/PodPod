@@ -70,6 +70,7 @@
 	  <None Remove="Models\" />
 	  <None Remove="Views\" />
 	  <None Remove="Services\" />
+	  <None Remove="Resources\Images\cover.png" />
 	</ItemGroup>
 	<ItemGroup>
 	  <MauiAsset Update="Resources\Raw\ggml-base.en.bin">
@@ -80,5 +81,8 @@
 	  <Folder Include="Models\" />
 	  <Folder Include="Views\" />
 	  <Folder Include="Services\" />
+	</ItemGroup>
+	<ItemGroup>
+	  <BundleResource Include="Resources\Images\cover.png" />
 	</ItemGroup>
 </Project>
