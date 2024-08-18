@@ -29,7 +29,6 @@ public partial class LibraryPage : ContentPage
 		List<Podcast> pods = await FeedsService.CreatePodcastList(opml);
 		Console.WriteLine("Podcasts: " + pods.Count);
 
-		// convert to observable collection
 		foreach (var podcast in pods)
 		{
 			Podcasts.Add(podcast);

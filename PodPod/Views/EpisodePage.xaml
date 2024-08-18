@@ -22,7 +22,9 @@
             
             <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" BackgroundColor="LightGray" HeightRequest="3" Margin="20,0,20,20"/>
 
-            <VerticalStackLayout x:Name="TranscriptionContainer" Grid.Column="1" Grid.ColumnSpan="4" Grid.Row="3" Margin="20,0,20,10"/>
+            <VerticalStackLayout x:Name="TranscriptionContainer" Grid.Column="1" Grid.ColumnSpan="4" Grid.Row="3" Margin="20,0,20,10">
+                <Label Text="Transcription not available yet" FontSize="18" />
+            </VerticalStackLayout>
         </Grid>
     </ScrollView>
 </ContentPage>

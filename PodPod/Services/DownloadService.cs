@@ -4,7 +4,7 @@ namespace PodPod.Services;
 
 public static class DownloadService
 {
-	public static string DownloadPodcastEpisode(string url, string title)
+	public static Task<string> DownloadPodcastEpisode(string url, string title)
     {
         using (var client = new HttpClient())
         {
@@ -20,9 +20,10 @@ public static class DownloadService
                         
                     }
                 }
-                return filePath;
+                return Task.FromResult(filePath);
             } else {
-                return null;
+                // TODO: Handle error much better than this
+                return Task.FromResult(url);
             }
         }
     }

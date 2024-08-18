@@ -1,5 +1,6 @@
 ﻿using System;
 using FFMpegCore;
+using PodPod.Models;
 using Whisper.net;
 using Whisper.net.Ggml;
 
@@ -7,14 +8,20 @@ namespace PodPod.Services;
 
 public static class TranscriptionService
 {
-    public static async void TranscribePodcastEpisode(string filePath)
+
+    public static async Task<Episode> StartTranslationAsync(string filePath, Episode episode)
     {
+        return await Task.Run(() => TranscribePodcastEpisode(filePath, episode));
+    }
+
+    public static async Task<Episode> TranscribePodcastEpisode(string filePath, Episode episode)
+    {
+
+        var spanDataList = new List<Dictionary<string, object>>();
         try
         {
             var ggmlType = GgmlType.Base;
             var modelFileName = "ggml-base.en.bin";
-
-            // create a path from the folder and the file name
             string modelPath = Path.Combine(FileSystem.AppDataDirectory, "Raw/model", modelFileName);
             string destPath = Path.Combine(FileSystem.AppDataDirectory, modelFileName);
 
@@ -42,7 +49,7 @@ public static class TranscriptionService
             // This section creates the whisperFactory object which is used to create the processor object.
             using var whisperFactory = WhisperFactory.FromPath(destPath);
 
-            // This section creates the processor object which is used to process the audio file, it uses language `auto` to detect the language of the audio file.
+
             using var processor = whisperFactory.CreateBuilder()
                 .WithLanguage("auto")
                 .Build();
@@ -52,21 +59,16 @@ public static class TranscriptionService
             // This section processes the audio file and prints the results (start time, end time and text) to the console.
             await foreach (var result in processor.ProcessAsync(WavStream))
             {
-                Console.WriteLine($"{result.Start}->{result.End}: {result.Text}");
-                // Create a new label with a formatted string to match the cosole log abovve
-                // Add the label to the UI
-                Label label = new Label();
-                label.FormattedText = new FormattedString
+                spanDataList.Add(new Dictionary<string, object>
                 {
-                    Spans = {
-                        new Span { Text = $"{result.Start}->{result.End}: ", FontAttributes = FontAttributes.Bold },
-                        new Span { Text = result.Text }
-                    }
-                };
-
-                // Add the label to the UI
-                
+                    { "Start", result.Start },
+                    { "End", result.End },
+                    { "Text", result.Text }
+                });
             }
+            Console.WriteLine("Finished transcription at " + DateTime.Now);
+            episode.Transcription = spanDataList;
+            
         }
         catch (Exception e)
         {
@@ -77,6 +79,7 @@ public static class TranscriptionService
             Console.WriteLine("-----------------");
             Console.WriteLine(e.InnerException);
         }
+        return episode;
     }
 
     private static async Task DownloadModel(string fileName, GgmlType ggmlType)

@@ -45,16 +45,30 @@ public partial class EpisodePage : ContentPage
 		Debug.WriteLine("Navigated to");
         base.OnNavigatedTo(e);
 		
-		var filePath = DownloadService.DownloadPodcastEpisode(Episode.MediaURL, Episode.Title);
-		if (filePath != null)
+		if (Episode.Transcription != null){
+			TranscriptionContainer.IsVisible = true;			
+			TranscriptionContainer = updateTranscription(Episode);
+		} 
+	}
+
+	public VerticalStackLayout updateTranscription(Episode episode)
+	{
+		VerticalStackLayout transcriptionContainer = new VerticalStackLayout();
+
+		foreach (var spanData in Episode.Transcription)
 		{
-			Console.WriteLine("Downloaded " + Episode.Title + " to " + filePath);
-			TranscribePodcastEpisode(filePath);
+			Label label = new Label();
+			label.FormattedText = new FormattedString();
+			var span = new Span
+			{
+				Text = $"{spanData["Start"]}->{spanData["End"]}: {spanData["Text"]}",
+			};
+			
+			label.FormattedText.Spans.Add(span);
+			transcriptionContainer.Children.Add(label);
 		}
-		else
-		{
-			Console.WriteLine("Failed to download " + Episode.Title);
-		}
+
+		return transcriptionContainer;
 	}
 
 	public Command BackOverrideCommand
