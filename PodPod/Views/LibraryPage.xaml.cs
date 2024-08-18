@@ -9,7 +9,7 @@ namespace PodPod.Views;
 public partial class LibraryPage : ContentPage
 {
 	public ObservableCollection<Podcast> Podcasts { get; set; } = new ObservableCollection<Podcast>();
-	 Podcast? selectedPodcast;
+	public Podcast? SelectedPodcast;
 
 	public LibraryPage()
 	{
@@ -41,7 +41,7 @@ public partial class LibraryPage : ContentPage
 	{
 		try
 		{
-            Debug.WriteLine($"Podcast Selection Changed: {selectedPodcast}");
+            Debug.WriteLine($"Podcast Selection Changed: {SelectedPodcast}");
             var podcast = e.CurrentSelection.FirstOrDefault() as Podcast;
             Debug.WriteLine($"Selected Podcast: {podcast.Title}");
 

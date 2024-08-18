@@ -1,8 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using CommunityToolkit.Maui.Views;
+using FFMpegCore;
 using Podly.FeedParser;
 using PodPod.Models;
+using Whisper.net.Ggml;
+using PodPod.Services;
 
 namespace PodPod.Views;
 
@@ -43,17 +46,23 @@ public partial class PodcastPage : ContentPage
 		Debug.WriteLine("Podcast Page Appearing");
 		Debug.WriteLine($"Podcast: {Podcast.Title}");
 		this.Title = $"{Podcast.Title}";
-
-		
 	}
 
 	protected override void OnNavigatedTo(NavigatedToEventArgs e)
     {
-		Debug.WriteLine("Navigated to");
+		Debug.WriteLine("Navigated to Podcast Page");
         base.OnNavigatedTo(e);
 
         var factory = new HttpFeedFactory();
-        var feed = factory.CreateFeed(new Uri(Podcast.FeedUrl));
+		var feed = factory.CreateFeed(new Uri(Podcast.FeedUrl)) as Rss20Feed;
+
+		Debug.WriteLine($"Feed for {feed.Title} retrieved");
+
+		var description = feed.Description;
+        PodcastDescription.Text = "Description:  " + description;
+
+		Podcast.Cover = feed.CoverImageUrl;
+		Cover.Source = Podcast.Cover;
 
         foreach (var item in feed.Items)
         {
@@ -67,9 +76,23 @@ public partial class PodcastPage : ContentPage
         }
 
 		EpisodeCount.Text = $"Episodes: {Episodes.Count}";
+
+		
     }
 
-	public void Episode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+	// Implement the click event
+	//<Button Text="Transcribe" Clicked="TranscribeEpisode" />
+	public async void TranscribeEpisode(object sender, EventArgs e){
+		Debug.WriteLine("Transcribe Episode Clicked");
+
+		// get the selected episode
+		
+
+		// call the TranscribePodcastEpisode
+		TranscriptionService.TranscribePodcastEpisode(Episodes[0]);
+	}
+
+	public async void Episode_SelectionChanged(object sender, SelectionChangedEventArgs e)
 	{
 		var episode = e.CurrentSelection.FirstOrDefault() as Episode;
 		Debug.WriteLine($"Episode Selected: {episode?.Title}");
@@ -88,5 +111,20 @@ public partial class PodcastPage : ContentPage
 			Label episodeDetails = shell.GetEpisodeDetails();
 			episodeDetails.Text = $"Episode: {episode?.Title}";
         }
+
+		try
+		{
+            await Shell.Current.GoToAsync($"{nameof(EpisodePage)}",
+                new Dictionary<string, object>
+                {
+                    ["Episode"] = episode,
+					["Podcase"] = Podcast
+                });
+
+        } catch (Exception err)
+		{
+			Debug.WriteLine(err.Message);
+		}
 	}
+
 }

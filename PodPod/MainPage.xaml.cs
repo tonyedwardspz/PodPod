@@ -143,8 +143,6 @@ public partial class MainPage : ContentPage
                 }
             }
 
-
-
             if (!File.Exists(destPath))
             {
                 Console.WriteLine("Model not found");

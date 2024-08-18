@@ -8,15 +8,15 @@
 
 
         <Grid Padding="10,20,20,0"
-              RowDefinitions="50, 200, Auto, *"
+              RowDefinitions="50, 50, 150, Auto, *"
               ColumnDefinitions="250, *, 150, 100">
 
-            <Image Source="{Binding Podcast.Cover}" Grid.Column="0"  Grid.Row="0" Grid.RowSpan="2" Margin="20,0,20,20"/>
+            <Image Source="{Binding Podcast.Cover}" x:Name="Cover" Grid.Column="0"  Grid.Row="0" Grid.RowSpan="3" Margin="20,0,20,20"/>
             <Label Text="{Binding Podcast.Title}" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="0" FontSize="18" Margin="20,0,20,10"/>
             <Label Text="Episodes: " x:Name="EpisodeCount" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" FontSize="15" Margin="20,0,20,0" />
-            <!-- <Label Text="{Binding Podcast.Description}" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" FontSize="14" /> -->
+            <Label Text="Description:  " x:Name="PodcastDescription" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2" FontSize="14" Margin="20,0,20,0"/>
             
-            <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" BackgroundColor="LightGray" HeightRequest="3" Margin="20,0,20,20"/>
+            <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" BackgroundColor="LightGray" HeightRequest="3" Margin="20,0,20,20"/>
 
             <CollectionView
                 Grid.Row="4"
@@ -25,15 +25,18 @@
                 ItemsSource="{Binding Episodes}"
                 SelectionMode="Single"
                 SelectionChanged="Episode_SelectionChanged"
+                SelectedItem="SelectedEpisode"
                 EmptyView="Loading episodes">
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid Padding="10">
 
-                            <StackLayout Padding="10,0">
+                            <HorizontalStackLayout Padding="10,0">
                                 <Label Text="{Binding Title}" FontSize="18" />
-                            </StackLayout>
+
+                                <Button Text="Transcribe" Clicked="TranscribeEpisode" />
+                            </HorizontalStackLayout>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
