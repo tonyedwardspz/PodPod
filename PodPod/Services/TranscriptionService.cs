@@ -46,17 +46,15 @@ public static class TranscriptionService
             var WavPath = ConvertMp3ToWav(filePath);
             using var WavStream = File.OpenRead(WavPath);
 
-            // This section creates the whisperFactory object which is used to create the processor object.
+            Console.WriteLine("Creating Whisper Factory at " + DateTime.Now);
             using var whisperFactory = WhisperFactory.FromPath(destPath);
 
-
+            Console.WriteLine("Creating Processor " + DateTime.Now);
             using var processor = whisperFactory.CreateBuilder()
                 .WithLanguage("auto")
                 .Build();
 
             Console.WriteLine("Starting transcription at " + DateTime.Now);
-
-            // This section processes the audio file and prints the results (start time, end time and text) to the console.
             await foreach (var result in processor.ProcessAsync(WavStream))
             {
                 spanDataList.Add(new Dictionary<string, object>

@@ -86,6 +86,9 @@ public partial class PodcastPage : ContentPage
                 Podcast.Cover = Podcast.Feed.CoverImageUrl;
 				MainThread.BeginInvokeOnMainThread(() => Cover.Source = Podcast.Cover);
 
+				Podcast.EpisodeCount = Podcast.Feed.Items.Count;
+				MainThread.BeginInvokeOnMainThread(() => EpisodeCount.Text = "Episodes: " + Podcast.EpisodeCount);
+
                 Debug.WriteLine("Building Episode list");
                 foreach (var item in Podcast.Feed.Items)
 				{
@@ -99,9 +102,6 @@ public partial class PodcastPage : ContentPage
 				}
 				Podcast.Episodes = Episodes.ToList();
                 Debug.WriteLine("Episode list built");
-
-                Podcast.EpisodeCount = Episodes.Count;
-				MainThread.BeginInvokeOnMainThread(() => EpisodeCount.Text = "Episodes: " + Podcast.EpisodeCount);
 			});
 			Debug.WriteLine($"Podcast page: {Podcast.EpisodeCount} episodes of {Podcast.Title} loaded.");
 		}
@@ -115,30 +115,51 @@ public partial class PodcastPage : ContentPage
 			var episode = button.BindingContext as Episode;
 			if (episode != null && episode.Transcription == null)
 			{
-                MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing...");
-                episode.MediaURL = await DownloadService.DownloadPodcastEpisode(episode.MediaURL, episode.Title);
-				
-				episode = await TranscriptionService.StartTranslationAsync(episode.MediaURL, episode);
-				var index = Episodes.IndexOf(episode);
-				Episodes[index] = episode;
-				Podcast.Episodes = Episodes.ToList();
-			}
+				try
+				{
+					MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloading episode...");
+					episode.MediaURL = await DownloadService.DownloadPodcastEpisode(episode.MediaURL, episode.Title);
 
-			MainThread.BeginInvokeOnMainThread(() => button.Clicked += async (s, e) =>
-			{
-				button.Text = "View Transcript";
-				button.GestureRecognizers.Clear();
-				await Shell.Current.GoToAsync($"{nameof(EpisodePage)}",
-					new Dictionary<string, object>
-					{
-						["Episode"] = episode,
-						["Podcast"] = Podcast
-					});
-			});
+					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing episode...");
+					episode = await TranscriptionService.StartTranslationAsync(episode.MediaURL, episode);
+					episode.IsUnTranscribed = false;
+
+					MainThread.BeginInvokeOnMainThread(() => button.IsVisible = false);
+
+					var index = Episodes.IndexOf(episode);
+					Episodes[index] = episode;
+					Podcast.Episodes = Episodes.ToList();
+				}
+				catch (Exception err)
+				{
+					Debug.WriteLine(err.Message);
+				}
+			}
 		}
 	}
 
-	private bool isPlaying = false;
+	public async void ViewEpisode(object sender, EventArgs e)
+	{
+        if (sender is Button button)
+        {
+            var episode = button.BindingContext as Episode;
+            if (episode != null)
+            {
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await Shell.Current.GoToAsync($"{nameof(EpisodePage)}",
+                        new Dictionary<string, object>
+                        {
+                            ["Episode"] = episode,
+                            ["Podcast"] = Podcast
+                        });
+                });
+            }
+        }
+    }
+
+
+    private bool isPlaying = false;
 	public async void Episode_SelectionChanged(object sender, SelectionChangedEventArgs e)
 	{
 		

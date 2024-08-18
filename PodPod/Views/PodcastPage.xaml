@@ -33,16 +33,28 @@
                         <Grid Padding="10">
 
                             <HorizontalStackLayout Padding="10,0">
-                                <Label Text="{Binding Title}" FontSize="18" />
+                                <Label
+                                    Text="{Binding Title}"
+                                    FontSize="18"
+                                    HorizontalOptions="FillAndExpand"/>
 
-                                <Button Text="Transcribe" Clicked="TranscribeEpisode" />
+                                <Button
+                                    Text="Transcribe"
+                                    Clicked="TranscribeEpisode"
+                                    IsVisible="{Binding IsUnTranscribed}"
+                                    HorizontalOptions="End"
+                                    />
+
+                                <Button
+                                    Text="View Episode"
+                                    Clicked="ViewEpisode"
+                                    HorizontalOptions="End"/>
                             </HorizontalStackLayout>
+
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-
         </Grid>
-        
     </ScrollView>
 </ContentPage>

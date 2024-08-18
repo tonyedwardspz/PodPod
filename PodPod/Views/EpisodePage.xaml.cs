@@ -45,29 +45,39 @@ public partial class EpisodePage : ContentPage
 		Debug.WriteLine("Navigated to");
         base.OnNavigatedTo(e);
 		
-		if (Episode.Transcription != null){
-			TranscriptionContainer.IsVisible = true;			
-			TranscriptionContainer = updateTranscription(Episode);
+		if (Episode.Transcription != null){	
+			TranscriptionContainer.Children.Clear();
+			TranscriptionContainer.Children.Add(updateTranscription(Episode));
 		} 
 	}
 
 	public VerticalStackLayout updateTranscription(Episode episode)
 	{
 		VerticalStackLayout transcriptionContainer = new VerticalStackLayout();
+		transcriptionContainer.HorizontalOptions = LayoutOptions.FillAndExpand;
 
-		foreach (var spanData in Episode.Transcription)
+		try
 		{
-			Label label = new Label();
-			label.FormattedText = new FormattedString();
-			var span = new Span
-			{
-				Text = $"{spanData["Start"]}->{spanData["End"]}: {spanData["Text"]}",
-			};
-			
-			label.FormattedText.Spans.Add(span);
-			transcriptionContainer.Children.Add(label);
-		}
+            foreach (var spanData in Episode.Transcription)
+            {
+                Label label = new Label();
+				label.FontSize = 16;
+				label.HorizontalTextAlignment = TextAlignment.Start;
+				label.VerticalTextAlignment = TextAlignment.Center;
+                label.FormattedText = new FormattedString();
+                var span = new Span
+                {
+                    Text = $"{spanData["Start"]}->{spanData["End"]}: {spanData["Text"]}",
+                };
 
+                label.FormattedText.Spans.Add(span);
+                transcriptionContainer.Children.Add(label);
+            }
+        } catch (Exception e)
+		{
+			Debug.WriteLine(e.Message);
+		}
+		
 		return transcriptionContainer;
 	}
 
@@ -78,11 +88,7 @@ public partial class EpisodePage : ContentPage
             Debug.WriteLine("Back button override pressed");
 			return new Command(async () =>
 			{
-				await Shell.Current.GoToAsync($"{nameof(PodcastPage)}",
-                new Dictionary<string, object>
-                {
-                    ["Podcast"] = Podcast
-                });
+				await Shell.Current.GoToAsync("..");
 			});
 		}
 	}

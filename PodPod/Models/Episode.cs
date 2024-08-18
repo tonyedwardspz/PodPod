@@ -11,6 +11,7 @@ public class Episode
     public TimeSpan? Duration { get; set; }
     public DateTime? Published { get; set; }
     public List<Dictionary<string, object>>? Transcription { get; set; }
+    public bool IsUnTranscribed { get; set ; } = true;
 
     public Episode()
 	{
