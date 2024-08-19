@@ -33,8 +33,7 @@
                 <DataTemplate >
                     <Grid Padding="20, 10, 10, 10" ColumnDefinitions="*,Auto,Auto,Auto" RowSpacing="10" >
 
-                        <VerticalStackLayout Grid.Column="0"
-                                                HorizontalOptions="FillAndExpand">
+                        <VerticalStackLayout Grid.Column="0" >
                             <Label
                                 Text="{Binding Published}"
                                 FontSize="12"

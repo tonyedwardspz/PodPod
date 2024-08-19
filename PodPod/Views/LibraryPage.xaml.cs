@@ -60,13 +60,11 @@ public partial class LibraryPage : ContentPage
 		try
 		{
             Debug.WriteLine($"Podcast Selection Changed: {SelectedPodcast}");
-            var podcast = e.CurrentSelection.FirstOrDefault() as Podcast;
-            Debug.WriteLine($"Selected Podcast: {podcast.Title}");
 
             await Shell.Current.GoToAsync($"{nameof(PodcastPage)}",
                 new Dictionary<string, object>
                 {
-                    ["Podcast"] = podcast
+                    ["Podcast"] = SelectedPodcast
                 });
 			SelectedPodcast = null;
         } catch (Exception err)

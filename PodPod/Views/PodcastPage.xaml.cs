@@ -138,7 +138,6 @@ public partial class PodcastPage : ContentPage
 
 					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
 					episode = await TranscriptionService.StartTranslationAsync(episode.MediaURL, episode);
-					episode.IsUnTranscribed = false;
 
 					MainThread.BeginInvokeOnMainThread(() => button.IsVisible = false);
 

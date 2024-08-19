@@ -423,5 +423,27 @@
         <Setter Property="SelectedTabColor" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
     </Style>
 
+
+    <Style TargetType="Label" x:Key="BodyText">
+
+    </Style>
+
+    <Style TargetType="Label" x:Key="BodyTextBold" BasedOn="{StaticResource BodyText}">
+
+    </Style>
+
+
+    <Style TargetType="Span" x:Key="BodyTextSpan">
+        <Setter Property="FontSize" Value="15"/>
+    </Style>
+
+    <Style TargetType="Span" x:Key="BodyTextBoldSpan" BasedOn="{StaticResource BodyTextSpan}">
+
+    </Style>
+
+    <Style TargetType="Span" x:Key="BodyTextLinkSpan" BasedOn="{StaticResource BodyTextBoldSpan}">
+        <Setter Property="TextColor" Value="AliceBlue" />
+    </Style>
+
 </ResourceDictionary>
 
