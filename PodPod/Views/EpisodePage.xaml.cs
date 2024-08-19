@@ -1,9 +1,7 @@
 ﻿using System.Diagnostics;
-using FFMpegCore;
+using CommunityToolkit.Maui.Views;
 using PodPod.Models;
 using PodPod.Services;
-using Whisper.net;
-using Whisper.net.Ggml;
 
 namespace PodPod.Views;
 
@@ -77,22 +75,61 @@ public partial class EpisodePage : ContentPage
 		{
 			Debug.WriteLine(e.Message);
 		}
-		
 		return transcriptionContainer;
 	}
 
-	public Command BackOverrideCommand
-	{
-		get
+	public async void TranscribeEpisode(object sender, EventArgs e){
+		Debug.WriteLine("Transcribe Episode Clicked at " + new DateTime().ToShortDateString());
+
+		if (sender is Button button)
 		{
-            Debug.WriteLine("Back button override pressed");
-			return new Command(async () =>
-			{
-				await Shell.Current.GoToAsync("..");
-			});
+			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloading episode...");
+			Episode.MediaURL = await DownloadService.DownloadPodcastEpisode(Episode.MediaURL, Episode.Title);
+
+			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing episode...");
+			Episode = await TranscriptionService.StartTranslationAsync(Episode.MediaURL, Episode);
+			Episode.IsUnTranscribed = false;
+
+			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribed");
+			MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
+
+			TranscriptionContainer.Clear();
+			TranscriptionContainer.Add(updateTranscription(Episode));
 		}
 	}
 
+	public async void DownloadEpisode(object sender, EventArgs e)
+	{
+		Debug.WriteLine($"Download episode clicked");
+        if (sender is Button button)
+        {
+			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloading");
+			Episode.MediaURL = await DownloadService.DownloadPodcastEpisode(Episode.MediaURL, Episode.Title);
+			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloaded");
+			MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
+        }
+    }
 
-	
+	public async void PlayEpisode(object sender, EventArgs e)
+	{
+        if (sender is Button button)
+        {
+            await MainThread.InvokeOnMainThreadAsync(() =>
+			{
+				if (Shell.Current is AppShell shell)
+				{
+					MediaElement player = shell.GetPlayer();
+					shell.CurrentEpisode = Episode;
+					player.Source = Episode?.MediaURL;
+					player.Play();
+
+					Label details = shell.GetPodcastDetails();
+					details.Text = $"Series: {Podcast.Title}";
+
+					Label episodeDetails = shell.GetEpisodeDetails();
+					episodeDetails.Text = $"Episode: {episode?.Title}";
+				}
+			});
+        }
+    }
 }

@@ -121,7 +121,7 @@
 
     <FlyoutItem Title="Podcast Library">
         <Tab>
-            <ShellContent ContentTemplate="{DataTemplate views:LibraryPage}" Title="Podcast Library" Route="LibraryPage"/>
+            <ShellContent ContentTemplate="{DataTemplate views:LibraryPage}" Title="Podcast Library"/>
         </Tab>
     </FlyoutItem>
 

@@ -3,27 +3,50 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PodPod.Views.EpisodePage"
              Title="EpisodePage">
-
-    <!--<Shell.BackButtonBehavior>
-        <BackButtonBehavior Command="{Binding BackOverrideCommand}" />
-    </Shell.BackButtonBehavior>-->
     
     <ScrollView>
 
-
         <Grid Padding="10,20,20,0"
-              RowDefinitions="50, 200, Auto, *"
+              RowDefinitions="50, Auto, Auto, Auto, Auto, Auto"
               ColumnDefinitions="250, *, 150, 100">
 
             <Image Source="{Binding Podcast.Cover}" Grid.Column="0"  Grid.Row="0" Grid.RowSpan="2" Margin="20,0,20,20"/>
-            <Label Text="{Binding Podcast.Title}" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="0" FontSize="18" Margin="20,0,20,10"/>
-            <!--<Label Text="Episodes: " x:Name="EpisodeCount" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" FontSize="15" Margin="20,0,20,0" />-->
-             <Label Text="{Binding Podcast.Description}" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" FontSize="14" /> 
+
+            <VerticalStackLayout Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="2">
             
+                <Label Text="{Binding Podcast.Title}" FontSize="22" Margin="20,0,20,10"/>
+                <Label Text="{Binding Episode.Title}" FontSize="16" Margin="20,0,20,10"/>
+                <Label Text="{Binding Episode.Duration }" FontSize="16" Margin="20,0,20,10"/>
+                <Label Text="{Binding Episode.Published}" FontSize="16" Margin="20,0,20,10"/>
+                <Label Text="{Binding Episode.Description}" FontSize="16" Margin="20,0,20,0" /> 
+            
+            </VerticalStackLayout>
+
             <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" BackgroundColor="LightGray" HeightRequest="3" Margin="20,0,20,20"/>
 
-            <VerticalStackLayout x:Name="TranscriptionContainer" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="3" Margin="20,0,20,10" HorizontalOptions="FillAndExpand">
-                <Label Text="Transcription not available yet" FontSize="18" />
+            <HorizontalStackLayout Grid.Row="3" Margin="20,0,20,20">
+
+                <Button
+                    Text="Play"
+                    Clicked="PlayEpisode"
+                    Margin="0,0,5,0"/>
+
+                <Button
+                    Text="Download"
+                    Clicked="DownloadEpisode"
+                    Margin="0,0,5,0"/>
+
+                <Button
+                    Text="Transcribe"
+                    Clicked="TranscribeEpisode"
+                    IsVisible="{Binding Episode.IsUnTranscribed}"
+                    Margin="0,0,5,0"
+                    />
+            
+            </HorizontalStackLayout>
+
+            <VerticalStackLayout x:Name="TranscriptionContainer" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="4" Margin="20,0,20,10" HorizontalOptions="FillAndExpand">
+                <Label Text="Transcription not available yet. Start it above." FontSize="16" />
             </VerticalStackLayout>
         </Grid>
     </ScrollView>

@@ -9,7 +9,7 @@ namespace PodPod.Views;
 public partial class LibraryPage : ContentPage
 {
 	public ObservableCollection<Podcast> Podcasts { get; set; } = new ObservableCollection<Podcast>();
-	public Podcast? SelectedPodcast;
+	public Podcast SelectedPodcast { get; set; }
 
 	public LibraryPage()
 	{
@@ -19,7 +19,7 @@ public partial class LibraryPage : ContentPage
 
 	protected override void OnNavigatedTo(NavigatedToEventArgs e)
     {
-		Debug.WriteLine("Navigated to");
+		Debug.WriteLine("Navigated to Library Page");
         base.OnNavigatedTo(e);
 		PrepPodcasts();
 	}
@@ -27,7 +27,6 @@ public partial class LibraryPage : ContentPage
 	public async void PrepPodcasts(){
 		Opml opml = await FeedsService.ProcessOPMLFile();
 		List<Podcast> pods = await FeedsService.CreatePodcastList(opml);
-		Console.WriteLine("Podcasts: " + pods.Count);
 
 		foreach (var podcast in pods)
 		{

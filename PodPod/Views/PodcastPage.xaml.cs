@@ -32,6 +32,10 @@ public partial class PodcastPage : ContentPage
 		}
 	}
 
+	public Podcast SelectedPodcast { get; set; }
+
+	bool PageLoaded = false;
+
 	public PodcastPage()
 	{
 		InitializeComponent();
@@ -49,6 +53,8 @@ public partial class PodcastPage : ContentPage
 	protected override async void OnNavigatedTo(NavigatedToEventArgs e)
     {
 		Debug.WriteLine("Navigated to Podcast Page");
+		PageLoaded = true;
+
         base.OnNavigatedTo(e);
 
 		if (Podcast.Description != null)
@@ -70,10 +76,10 @@ public partial class PodcastPage : ContentPage
 
 			await Task.Run(() =>
 			{
-                Debug.WriteLine("Creating factory");
+                Debug.WriteLine("Fetching feed");
                 var factory = new HttpFeedFactory();
 				Podcast.Feed = factory.CreateFeed(new Uri(Podcast.FeedUrl)) as Rss20Feed;
-				Debug.WriteLine("Factory Created");
+				Debug.WriteLine("Feed fetched");
 			});
 
 			await Task.Run(() =>
@@ -89,15 +95,24 @@ public partial class PodcastPage : ContentPage
 				Podcast.EpisodeCount = Podcast.Feed.Items.Count;
 				MainThread.BeginInvokeOnMainThread(() => EpisodeCount.Text = "Episodes: " + Podcast.EpisodeCount);
 
+				Podcast.LastPublished = Podcast.Feed.LastUpdated;
+				MainThread.BeginInvokeOnMainThread(() => LastPublished.Text = "Last Published: " + Podcast.LastPublished.ToString());
+
                 Debug.WriteLine("Building Episode list");
                 foreach (var item in Podcast.Feed.Items)
 				{
 					Episodes.Add(new Episode
 					{
+						Id = item.Id,
 						Title = item.Title,
 						MediaURL = item.MediaUrl,
 						Description = item.Content,
-						Published = item.DatePublished
+						Published = item.DatePublished,
+						Cover = item.Cover,
+						Author = item.Author,
+						Link = item.Link,
+						EpisodeNumber = item.EpisodeNumber,
+						Duration = item.MediaLength
 					});
 				}
 				Podcast.Episodes = Episodes.ToList();
@@ -117,10 +132,10 @@ public partial class PodcastPage : ContentPage
 			{
 				try
 				{
-					MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloading episode...");
+					MainThread.BeginInvokeOnMainThread(() => button.Text = "Preparing Audio");
 					episode.MediaURL = await DownloadService.DownloadPodcastEpisode(episode.MediaURL, episode.Title);
 
-					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing episode...");
+					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
 					episode = await TranscriptionService.StartTranslationAsync(episode.MediaURL, episode);
 					episode.IsUnTranscribed = false;
 
@@ -140,6 +155,7 @@ public partial class PodcastPage : ContentPage
 
 	public async void ViewEpisode(object sender, EventArgs e)
 	{
+		Debug.WriteLine($"View episode clicked");
         if (sender is Button button)
         {
             var episode = button.BindingContext as Episode;
@@ -158,44 +174,54 @@ public partial class PodcastPage : ContentPage
         }
     }
 
+	public async void PlayEpisode(object sender, EventArgs e)
+	{
+        if (sender is Button button)
+        {
+            var episode = button.BindingContext as Episode;
+            if (episode != null)
+            {
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    if (Shell.Current is AppShell shell)
+					{
+						MediaElement player = shell.GetPlayer();
+						shell.CurrentEpisodeList = Episodes;
+						shell.CurrentEpisode = episode;
+						player.Source = episode?.MediaURL;
+						player.Play();
 
-    private bool isPlaying = false;
+						Label details = shell.GetPodcastDetails();
+						details.Text = $"Series: {Podcast.Title}";
+
+						Label episodeDetails = shell.GetEpisodeDetails();
+						episodeDetails.Text = $"Episode: {episode?.Title}";
+					}
+                });
+            }
+        }
+    }
+
 	public async void Episode_SelectionChanged(object sender, SelectionChangedEventArgs e)
 	{
-		
+		if (!PageLoaded) return;
+
 		var episode = e.CurrentSelection.FirstOrDefault() as Episode;
 		Debug.WriteLine($"Episode Selected: {episode?.Title}");
 
-		if (Shell.Current is AppShell shell)
-        {
-            MediaElement player = shell.GetPlayer();
-			shell.CurrentEpisodeList = Episodes;
-			shell.CurrentEpisode = episode;
-			player.Source = episode?.MediaURL;
-			player.Play();
-			isPlaying = true;
+		try
+		{
+			await Shell.Current.GoToAsync($"{nameof(EpisodePage)}",
+				new Dictionary<string, object>
+				{
+					["Episode"] = episode,
+					["Podcast"] = Podcast
+				});
+			SelectedPodcast = null;
 
-			Label details = shell.GetPodcastDetails();
-			details.Text = $"Series: {Podcast.Title}";
-
-			Label episodeDetails = shell.GetEpisodeDetails();
-			episodeDetails.Text = $"Episode: {episode?.Title}";
-        }
-
-		if (isPlaying){
-			try
-			{
-				await Shell.Current.GoToAsync($"{nameof(EpisodePage)}",
-					new Dictionary<string, object>
-					{
-						["Episode"] = episode,
-						["Podcase"] = Podcast
-					});
-
-			} catch (Exception err)
-			{
-				Debug.WriteLine(err.Message);
-			}
+		} catch (Exception err)
+		{
+			Debug.WriteLine(err.Message);
 		}
 	}
 }
