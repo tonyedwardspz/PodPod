@@ -20,30 +20,27 @@ public static class TranscriptionService
         var spanDataList = new List<Dictionary<string, object>>();
         try
         {
-            var ggmlType = GgmlType.Base;
             var modelFileName = "ggml-base.en.bin";
             string modelPath = Path.Combine(FileSystem.AppDataDirectory, "Raw/model", modelFileName);
             string destPath = Path.Combine(FileSystem.AppDataDirectory, modelFileName);
 
-            using (var stream = await FileSystem.OpenAppPackageFileAsync(modelFileName))
-            {
-                using (var destStream = File.Create(destPath))
-                {
-                    await stream.CopyToAsync(destStream);
-                }
-            }
-
             if (!File.Exists(destPath))
             {
-                Console.WriteLine("Model not found");
-                await DownloadModel(modelFileName, ggmlType);
+                Console.WriteLine("Moving model to the right place");
+                using (var stream = await FileSystem.OpenAppPackageFileAsync(modelFileName))
+                {
+                    using (var destStream = File.Create(destPath))
+                    {
+                        await stream.CopyToAsync(destStream);
+                    }
+                }
             }
             else
             {
-                Console.WriteLine("Model found");
+                Console.WriteLine("Model found in the right place");
             }
 
-            var WavPath = ConvertMp3ToWav(filePath);
+            var WavPath = await ConvertMp3ToWav(filePath);
             using var WavStream = File.OpenRead(WavPath);
 
             Console.WriteLine("Creating Whisper Factory at " + DateTime.Now);
@@ -51,7 +48,7 @@ public static class TranscriptionService
 
             Console.WriteLine("Creating Processor " + DateTime.Now);
             using var processor = whisperFactory.CreateBuilder()
-                .WithLanguage("auto")
+                .WithLanguage("en")
                 .Build();
 
             Console.WriteLine("Starting transcription at " + DateTime.Now);
@@ -75,40 +72,32 @@ public static class TranscriptionService
         return episode;
     }
 
-    private static async Task DownloadModel(string fileName, GgmlType ggmlType)
-    {
-        Console.WriteLine($"Downloading Model {fileName}");
-        using var modelStream = await WhisperGgmlDownloader.GetGgmlModelAsync(ggmlType);
-        using var fileWriter = File.OpenWrite(fileName);
-        await modelStream.CopyToAsync(fileWriter);
-    }
-
-    private static string ConvertMp3ToWav(string inputFilePath)
+    private async static Task<string> ConvertMp3ToWav(string inputFilePath)
     {
         Console.WriteLine("Converting MP3 to WAV");
-        GlobalFFOptions.Configure(new FFOptions { BinaryFolder = "/opt/homebrew/bin", TemporaryFilesFolder = "/tmp", WorkingDirectory = "/tmp" });
 
         try {
             var outputFilePath = Path.ChangeExtension(inputFilePath, ".wav");
-            Console.WriteLine("Output file path: " + outputFilePath);
-
             if (File.Exists(outputFilePath))
             {
                 Console.WriteLine("WAV file already exists");
-                File.Delete(outputFilePath);
+                return outputFilePath;
             }
 
-            var outputStream = new MemoryStream();
+            await Task.Run(() =>
+            {
+                GlobalFFOptions.Configure(new FFOptions { BinaryFolder = "/opt/homebrew/bin", TemporaryFilesFolder = "/tmp", WorkingDirectory = "/tmp" });
+                var outputStream = new MemoryStream();
 
-            FFMpegArguments
-                .FromFileInput(inputFilePath)
-                .OutputToFile(outputFilePath, false, options => options
-                .WithCustomArgument("-ac 1 -ar 16000 -sample_fmt s16"))
-                .ProcessSynchronously();
+                FFMpegArguments
+                    .FromFileInput(inputFilePath)
+                    .OutputToFile(outputFilePath, false, options => options
+                    .WithCustomArgument("-ac 1 -ar 16000 -sample_fmt s16"))
+                    .ProcessSynchronously();
 
-            outputStream.Position = 0;
-            var size = outputStream.Length;
-            Console.WriteLine("WAV file created: ", size);
+                outputStream.Position = 0;
+                Console.WriteLine("WAV file created: ");
+            });
 
             return outputFilePath;
         } catch (Exception e)
