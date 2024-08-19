@@ -45,9 +45,7 @@ public partial class PodcastPage : ContentPage
 	protected override void OnAppearing()
 	{
 		base.OnAppearing();
-		Debug.WriteLine("Podcast Page Appearing");
-		Debug.WriteLine($"Podcast: {Podcast.Title}");
-		this.Title = $"{Podcast.Title}";
+		this.Title = $"Podcast: {Podcast.Title}";
 	}
 
 	protected override async void OnNavigatedTo(NavigatedToEventArgs e)

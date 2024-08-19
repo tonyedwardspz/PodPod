@@ -21,7 +21,10 @@ public partial class LibraryPage : ContentPage
     {
 		Debug.WriteLine("Navigated to Library Page");
         base.OnNavigatedTo(e);
-		PrepPodcasts();
+		if (Podcasts.Count == 0)
+		{
+			PrepPodcasts();
+		}
 	}
 
 	public async void PrepPodcasts(){
@@ -48,6 +51,7 @@ public partial class LibraryPage : ContentPage
                 {
                     ["Podcast"] = podcast
                 });
+			SelectedPodcast = null;
         } catch (Exception err)
 		{
 			Debug.WriteLine(err.Message);

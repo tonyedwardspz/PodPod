@@ -15,12 +15,9 @@
             
 
             <VerticalStackLayout Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="3">
-
-                <Label Text="{Binding Podcast.Title}" FontSize="18" Margin="20,0,20,10"/>
-                <Label Text="Episodes: " x:Name="EpisodeCount" FontSize="15" Margin="20,0,20,0" />
-                <Label Text="Last Published: " x:Name="LastPublished" FontSize="15" Margin="20,0,20,0" />
-                <Label Text="Description:  " x:Name="PodcastDescription"  FontSize="14" Margin="20,0,20,0"/>
-
+                <Label Text="Episodes: " x:Name="EpisodeCount" FontSize="15" Margin="20,0,20,5" />
+                <Label Text="Last Published: " x:Name="LastPublished" FontSize="15" Margin="20,0,20,5" />
+                <Label Text="Description:  " x:Name="PodcastDescription"  FontSize="14" Margin="20,0,20,5"/>
             </VerticalStackLayout>
             
             <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" BackgroundColor="LightGray" HeightRequest="3" Margin="20,0,20,20"/>
@@ -36,32 +33,48 @@
                 EmptyView="Loading episodes" >
 
                 <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Padding="10">
+                    <DataTemplate >
+                        <Grid Padding="20, 10, 10, 10" ColumnDefinitions="*,Auto,Auto,Auto" RowSpacing="10" >
 
-                            <HorizontalStackLayout Padding="10,0" HorizontalOptions="FillAndExpand">
+                            <VerticalStackLayout Grid.Column="0"
+                                                 HorizontalOptions="FillAndExpand">
+                                <Label
+                                    Text="{Binding Published}"
+                                    FontSize="12"
+                                    TextColor="LightGrey"
+                                    />
+                                
                                 <Label
                                     Text="{Binding Title}"
-                                    FontSize="18"
-                                    HorizontalOptions="FillAndExpand"/>
+                                    HorizontalOptions="FillAndExpand"
+                                    FontSize="17"
+                                     />
 
-                                <Button
-                                    Text="Transcribe"
-                                    Clicked="TranscribeEpisode"
-                                    IsVisible="{Binding IsUnTranscribed}"
-                                    HorizontalOptions="End"
+                                <Label
+                                    Text="{Binding Duration}"
+                                    FontSize="14"
+                                    TextColor="LightGrey"
                                     />
+                                
+                            </VerticalStackLayout>
 
-                                <Button
-                                    Text="View"
-                                    Clicked="ViewEpisode"
-                                    HorizontalOptions="End"/>
+                            <Button
+                                Text="Transcribe"
+                                Grid.Column="1"
+                                Clicked="TranscribeEpisode"
+                                IsVisible="{Binding IsUnTranscribed}"
+                                Margin="0,0,5,0" />
 
-                                <Button
-                                    Text="Play"
-                                    Clicked="PlayEpisode"
-                                    HorizontalOptions="End"/>
-                            </HorizontalStackLayout>
+                            <Button
+                                Text="View"
+                                Grid.Column="2"
+                                Clicked="ViewEpisode"
+                                Margin="0,0,5,0"/>
+
+                            <Button
+                                Text="Play"
+                                Grid.Column="3"
+                                Clicked="PlayEpisode" />
 
                         </Grid>
                     </DataTemplate>

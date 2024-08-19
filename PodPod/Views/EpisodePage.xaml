@@ -13,13 +13,9 @@
             <Image Source="{Binding Podcast.Cover}" Grid.Column="0"  Grid.Row="0" Grid.RowSpan="2" Margin="20,0,20,20"/>
 
             <VerticalStackLayout Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="2">
-            
-                <Label Text="{Binding Podcast.Title}" FontSize="22" Margin="20,0,20,10"/>
-                <Label Text="{Binding Episode.Title}" FontSize="16" Margin="20,0,20,10"/>
-                <Label Text="{Binding Episode.Duration }" FontSize="16" Margin="20,0,20,10"/>
-                <Label Text="{Binding Episode.Published}" FontSize="16" Margin="20,0,20,10"/>
-                <Label Text="{Binding Episode.Description}" FontSize="16" Margin="20,0,20,0" /> 
-            
+                <Label Text="{Binding Episode.Published, StringFormat='Published: {0}'}" FontSize="16" Margin="20,0,20,5"/>
+                <Label Text="{Binding Episode.Duration, StringFormat='Duration: {0}'}" FontSize="16" Margin="20,0,20,5"/>
+                <Label Text="{Binding Episode.Description}" FontSize="16" Margin="20,0,20,5" />
             </VerticalStackLayout>
 
             <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" BackgroundColor="LightGray" HeightRequest="3" Margin="20,0,20,20"/>

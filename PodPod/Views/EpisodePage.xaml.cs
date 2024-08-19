@@ -40,13 +40,19 @@ public partial class EpisodePage : ContentPage
 
 	protected async override void OnNavigatedTo(NavigatedToEventArgs e)
     {
-		Debug.WriteLine("Navigated to");
+		Debug.WriteLine("Navigated to " + Episode.Title);
         base.OnNavigatedTo(e);
 		
 		if (Episode.Transcription != null){	
 			TranscriptionContainer.Children.Clear();
 			TranscriptionContainer.Children.Add(updateTranscription(Episode));
 		} 
+	}
+
+	protected override void OnAppearing()
+	{
+		base.OnAppearing();
+		this.Title = $"Episode: {Episode.Title}";
 	}
 
 	public VerticalStackLayout updateTranscription(Episode episode)
@@ -63,12 +69,19 @@ public partial class EpisodePage : ContentPage
 				label.HorizontalTextAlignment = TextAlignment.Start;
 				label.VerticalTextAlignment = TextAlignment.Center;
                 label.FormattedText = new FormattedString();
-                var span = new Span
-                {
-                    Text = $"{spanData["Start"]}->{spanData["End"]}: {spanData["Text"]}",
-                };
 
-                label.FormattedText.Spans.Add(span);
+				TimeSpan start = (TimeSpan)spanData["Start"];
+				string formattedTime = start.ToString(@"hh\:mm\:ss");
+
+                var span = new Span{ Text = $"{formattedTime}"};
+				label.FormattedText.Spans.Add(span);
+
+				span = new Span{ Text = " - "};
+				label.FormattedText.Spans.Add(span);
+
+				span = new Span{ Text = $"{spanData["Text"]}"};
+				label.FormattedText.Spans.Add(span);
+
                 transcriptionContainer.Children.Add(label);
             }
         } catch (Exception e)
@@ -83,10 +96,10 @@ public partial class EpisodePage : ContentPage
 
 		if (sender is Button button)
 		{
-			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloading episode...");
+			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloading");
 			Episode.MediaURL = await DownloadService.DownloadPodcastEpisode(Episode.MediaURL, Episode.Title);
 
-			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing episode...");
+			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
 			Episode = await TranscriptionService.StartTranslationAsync(Episode.MediaURL, Episode);
 			Episode.IsUnTranscribed = false;
 
