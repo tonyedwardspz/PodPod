@@ -62,6 +62,8 @@ public partial class EpisodePage : ContentPage
 
 		try
 		{
+			bool PartSentence = false;
+			Label partLabel = new Label();
             foreach (var spanData in Episode.Transcription)
             {
                 Label label = new Label();
@@ -73,16 +75,29 @@ public partial class EpisodePage : ContentPage
 				TimeSpan start = (TimeSpan)spanData["Start"];
 				string formattedTime = start.ToString(@"hh\:mm\:ss");
 
-                var span = new Span{ Text = $"{formattedTime}"};
-				label.FormattedText.Spans.Add(span);
+				if(PartSentence){
+					partLabel.FormattedText.Spans[2].Text += $" {spanData["Text"]}";
+					label = partLabel;
+					PartSentence = false;
+				} else {
+					var span = new Span{ Text = $"{formattedTime}"};
+					label.FormattedText.Spans.Add(span);
 
-				span = new Span{ Text = " - "};
-				label.FormattedText.Spans.Add(span);
+					span = new Span{ Text = " - "};
+					label.FormattedText.Spans.Add(span);
 
-				span = new Span{ Text = $"{spanData["Text"]}"};
-				label.FormattedText.Spans.Add(span);
+					span = new Span{ Text = $"{spanData["Text"]}"};
+					label.FormattedText.Spans.Add(span);
+				}
 
-                transcriptionContainer.Children.Add(label);
+				string text = spanData["Text"].ToString().Trim();
+				if (text.EndsWith(".") || text.EndsWith("?") || text.EndsWith("!") || text.EndsWith("]")){
+					PartSentence = false;
+					transcriptionContainer.Children.Add(label);
+				} else {
+					PartSentence = true;
+					partLabel = label;
+				}
             }
         } catch (Exception e)
 		{
@@ -101,14 +116,16 @@ public partial class EpisodePage : ContentPage
 
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
 			Episode = await TranscriptionService.StartTranslationAsync(Episode.MediaURL, Episode);
-			Episode.IsUnTranscribed = false;
 
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribed");
 			MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
 
 			TranscriptionContainer.Clear();
 			TranscriptionContainer.Add(updateTranscription(Episode));
-		}
+
+            var index = Data.Podcasts.FindIndex(p => p.Title.ToLower() == Podcast.Title.ToLower());
+            Data.Podcasts[index] = Podcast;
+        }
 	}
 
 	public async void DownloadEpisode(object sender, EventArgs e)

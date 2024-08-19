@@ -7,6 +7,14 @@ public class Episode
     public string? Id { get; set; }
     public string? Title { get; set; }
     public string? MediaURL { get; set; }
+    public bool NeedsDownloading { 
+        get {
+            if (MediaURL.StartsWith("http"))
+                return true;
+            else
+                return false;
+        }
+    }
     public string? Description { get; set; }
     public string? Cover { get; set; }
     public string? Author { get; set; }
@@ -16,11 +24,14 @@ public class Episode
     public string? Duration { get; set; }
 
     public List<Dictionary<string, object>>? Transcription { get; set; }
-    public bool IsUnTranscribed { get; set ; } = true;
+    public bool NeedsTranscribing { 
+        get {
+            if (Transcription != null && Transcription.Count > 0)
+                return false;
+            else
+                return true;
+        }
+    }
 
-    public Episode()
-	{
-
-	}
+    public Episode() { }
 }
-

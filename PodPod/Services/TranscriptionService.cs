@@ -70,12 +70,7 @@ public static class TranscriptionService
         }
         catch (Exception e)
         {
-            Console.WriteLine("-----------------");
             Console.WriteLine(e.Message);
-            Console.WriteLine("-----------------");
-            Console.WriteLine(e.StackTrace);
-            Console.WriteLine("-----------------");
-            Console.WriteLine(e.InnerException);
         }
         return episode;
     }

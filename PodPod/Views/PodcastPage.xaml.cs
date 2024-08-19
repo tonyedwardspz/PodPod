@@ -145,6 +145,8 @@ public partial class PodcastPage : ContentPage
 					var index = Episodes.IndexOf(episode);
 					Episodes[index] = episode;
 					Podcast.Episodes = Episodes.ToList();
+					var podIndex = Data.Podcasts.FindIndex(p => p.Title.ToLower() == Podcast.Title.ToLower());
+					Data.Podcasts[podIndex] = Podcast;
 				}
 				catch (Exception err)
 				{

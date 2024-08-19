@@ -19,13 +19,13 @@ public partial class LibraryPage : ContentPage
 			OnPropertyChanged(nameof(Podcasts));
 		}
 	}
-	public Podcast SelectedPodcast { get; set; }
+	public Podcast? SelectedPodcast { get; set; }
 
 	public LibraryPage()
 	{
 		InitializeComponent();
 		BindingContext = this;
-		Podcasts = new ObservableCollection<Podcast>();
+		Podcasts = Data.Podcasts.ToObservableCollection();
 	}
 
 	protected override void OnNavigatedTo(NavigatedToEventArgs e)
@@ -36,7 +36,6 @@ public partial class LibraryPage : ContentPage
 		if (Data.Podcasts.Count > 0)
 		{
 			Podcasts = Data.Podcasts.ToObservableCollection();
-
 		}
 		else
 		{

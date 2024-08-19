@@ -31,7 +31,8 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-maccatalyst|AnyCPU'">
-	  	<CreatePackage>true</CreatePackage>
+	  	<RuntimeIdentifier>maccatalyst-arm64</RuntimeIdentifier>  
+		<CreatePackage>true</CreatePackage>
 		<SignApp>false</SignApp>
 		<CodesignKey></CodesignKey>
 	</PropertyGroup>
