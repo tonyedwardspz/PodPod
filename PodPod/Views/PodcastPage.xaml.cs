@@ -115,6 +115,9 @@ public partial class PodcastPage : ContentPage
 				}
 				Podcast.Episodes = Episodes.ToList();
                 Debug.WriteLine("Episode list built");
+
+				var index = Data.Podcasts.FindIndex(p => p.Title.ToLower() == Podcast.Title.ToLower());
+				Data.Podcasts[index] = Podcast;
 			});
 			Debug.WriteLine($"Podcast page: {Podcast.EpisodeCount} episodes of {Podcast.Title} loaded.");
 		}

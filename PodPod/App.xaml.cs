@@ -1,4 +1,5 @@
 ﻿using PodPod.Views;
+using PodPod.Services;
 
 namespace PodPod;
 
@@ -7,6 +8,8 @@ public partial class App : Application
 	public App()
 	{
 		InitializeComponent();
+
+		Data.init();
 
 		MainPage = new AppShell();
 
