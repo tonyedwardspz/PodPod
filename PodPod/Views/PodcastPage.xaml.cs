@@ -89,21 +89,22 @@ public partial class PodcastPage : ContentPage
 				Podcast pod = Podcast;
 
                 pod.Description = feed.Description;
-                MainThread.BeginInvokeOnMainThread(() => PodcastDescription.Text = "Description:  " + Podcast.Description);
-
-                pod.Cover = feed.CoverImageUrl;
-				MainThread.BeginInvokeOnMainThread(() => Cover.Source = Podcast.Cover);
-
+				pod.Cover = feed.CoverImageUrl;
 				pod.EpisodeCount = feed.Items.Count;
-				MainThread.BeginInvokeOnMainThread(() => EpisodeCount.Text = "Episodes: " + Podcast.EpisodeCount);
-
 				pod.LastPublished = feed.LastUpdated;
-				MainThread.BeginInvokeOnMainThread(() => LastPublished.Text = "Last Published: " + Podcast.LastPublished.ToString());
 
+                MainThread.BeginInvokeOnMainThread(() => {
+					PodcastDescription.Text = "Description:  " + pod.Description;
+					Cover.Source = pod.Cover;
+					EpisodeCount.Text = "Episodes: " + pod.EpisodeCount;
+					LastPublished.Text = "Last Published: " + pod.LastPublished.ToString();
+				});
+
+				List<Episode> eps = new List<Episode>();
                 Debug.WriteLine("Building Episode list");
                 foreach (var item in feed.Items)
 				{
-					Episodes.Add(new Episode
+					eps.Add(new Episode
 					{
 						Id = item.Id,
 						Title = item.Title,
@@ -117,7 +118,9 @@ public partial class PodcastPage : ContentPage
 						Duration = item.MediaLength
 					});
 				}
-				pod.Episodes = Episodes.ToList();
+				pod.Episodes = eps;
+				Episodes = new ObservableCollection<Episode>(eps);
+				
                 Debug.WriteLine("Episode list built");
 
 				var index = Data.Podcasts.FindIndex(p => p.Title.ToLower() == pod.Title.ToLower());

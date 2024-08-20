@@ -111,20 +111,26 @@ public partial class EpisodePage : ContentPage
 
 		if (sender is Button button)
 		{
+			Episode ep = Episode;
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloading");
-			Episode.MediaURL = await DownloadService.DownloadPodcastEpisode(Episode.MediaURL, Episode.Title);
+			ep.MediaURL = await DownloadService.DownloadPodcastEpisode(ep.MediaURL, ep.Title);
 
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
-			Episode = await TranscriptionService.StartTranslationAsync(Episode.MediaURL, Episode);
+			ep = await TranscriptionService.StartTranslationAsync(ep.MediaURL, ep);
 
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribed");
 			MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
 
 			TranscriptionContainer.Clear();
-			TranscriptionContainer.Add(updateTranscription(Episode));
+			TranscriptionContainer.Add(updateTranscription(ep));
 
-            var index = Data.Podcasts.FindIndex(p => p.Title.ToLower() == Podcast.Title.ToLower());
-            Data.Podcasts[index] = Podcast;
+			Episode = ep;
+
+			var epIndex = Podcast.Episodes.FindIndex(p => p.Title.ToLower() == Episode.Title.ToLower());
+			Podcast.Episodes[epIndex] = ep;
+			
+            var podIndex = Data.Podcasts.FindIndex(p => p.Title.ToLower() == Podcast.Title.ToLower());
+            Data.Podcasts[podIndex] = Podcast;
         }
 	}
 
