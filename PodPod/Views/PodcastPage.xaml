@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PodPod.Views.PodcastPage"
+             xmlns:models="clr-namespace:PodPod.Models"
              Title="PodcastPage">
 
     <Grid Padding="10,20,20,0"
@@ -30,7 +31,7 @@
             EmptyView="Loading episodes" >
 
             <CollectionView.ItemTemplate>
-                <DataTemplate >
+                <DataTemplate x:DataType="models:Episode">
                     <Grid Padding="20, 10, 10, 10" ColumnDefinitions="*,Auto,Auto,Auto" RowSpacing="10" >
 
                         <VerticalStackLayout Grid.Column="0" >

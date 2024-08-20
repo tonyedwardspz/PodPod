@@ -2,7 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PodPod.Views.LibraryPage"
+             xmlns:models="clr-namespace:PodPod.Models"
              Title="LibraryPage">
+
     <ScrollView>
         
         <CollectionView 
@@ -18,10 +20,11 @@
             </CollectionView.ItemsLayout>
 
             <CollectionView.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="models:Podcast">
                     <StackLayout Padding="10,0"
                         MaximumWidthRequest="250"
                         VerticalOptions="Center" >
+                    
 
                         <Image Source="{Binding Cover}" 
                             MaximumHeightRequest="250" 
