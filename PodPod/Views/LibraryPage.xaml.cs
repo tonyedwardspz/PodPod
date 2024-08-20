@@ -46,12 +46,8 @@ public partial class LibraryPage : ContentPage
 	public async void PrepPodcasts(){
 		Opml opml = await FeedsService.ProcessOPMLFile();
 		List<Podcast> pods = await FeedsService.CreatePodcastList(opml);
-
-		foreach (var podcast in pods)
-		{
-			Podcasts.Add(podcast);
-		}
-		Console.WriteLine("Podcasts: " + Podcasts.Count);
+		Podcasts = pods.ToObservableCollection();
+		Console.WriteLine("Podcasts loaded: " + Podcasts.Count);
 		Data.Podcasts = pods;
 	}
 
