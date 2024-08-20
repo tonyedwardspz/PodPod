@@ -32,7 +32,7 @@
                             Margin="0,0,0,10" 
                               />
 
-                        <Label Text="{Binding Title}" 
+                        <Label Text="{Binding Title, Mode=OneTime}" 
                             FontSize="16"
                             MaximumWidthRequest="250"
 
