@@ -9,6 +9,19 @@
             "type": "maui",
             "request": "launch",
             "preLaunchTask": "maui: Build"
+        },
+        {
+            "name": ".NET Meteor Debugger",
+            "type": "dotnet-meteor.debugger",
+            "request": "launch",
+            "preLaunchTask": "dotnet-meteor: Build"
+        },
+        {
+            "name": ".NET Meteor Profiler",
+            "type": "dotnet-meteor.debugger",
+            "request": "launch",
+            "profilerMode": "trace",
+            "preLaunchTask": "dotnet-meteor: Build"
         }
     ]
 }
