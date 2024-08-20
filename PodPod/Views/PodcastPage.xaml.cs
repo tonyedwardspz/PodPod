@@ -86,16 +86,18 @@ public partial class PodcastPage : ContentPage
 			{
                 Debug.WriteLine("Updating to Podcast Page");
 
-                Podcast.Description = feed.Description;
+				Podcast pod = Podcast;
+
+                pod.Description = feed.Description;
                 MainThread.BeginInvokeOnMainThread(() => PodcastDescription.Text = "Description:  " + Podcast.Description);
 
-                Podcast.Cover = feed.CoverImageUrl;
+                pod.Cover = feed.CoverImageUrl;
 				MainThread.BeginInvokeOnMainThread(() => Cover.Source = Podcast.Cover);
 
-				Podcast.EpisodeCount = feed.Items.Count;
+				pod.EpisodeCount = feed.Items.Count;
 				MainThread.BeginInvokeOnMainThread(() => EpisodeCount.Text = "Episodes: " + Podcast.EpisodeCount);
 
-				Podcast.LastPublished = feed.LastUpdated;
+				pod.LastPublished = feed.LastUpdated;
 				MainThread.BeginInvokeOnMainThread(() => LastPublished.Text = "Last Published: " + Podcast.LastPublished.ToString());
 
                 Debug.WriteLine("Building Episode list");
@@ -115,11 +117,12 @@ public partial class PodcastPage : ContentPage
 						Duration = item.MediaLength
 					});
 				}
-				Podcast.Episodes = Episodes.ToList();
+				pod.Episodes = Episodes.ToList();
                 Debug.WriteLine("Episode list built");
 
-				var index = Data.Podcasts.FindIndex(p => p.Title.ToLower() == Podcast.Title.ToLower());
-				Data.Podcasts[index] = Podcast;
+				var index = Data.Podcasts.FindIndex(p => p.Title.ToLower() == pod.Title.ToLower());
+				Data.Podcasts[index] = pod;
+				Podcast = pod;
 			});
 			Debug.WriteLine($"Podcast page: {Podcast.EpisodeCount} episodes of {Podcast.Title} loaded.");
 		}
