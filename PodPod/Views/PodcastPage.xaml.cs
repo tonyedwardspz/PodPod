@@ -71,12 +71,14 @@ public partial class PodcastPage : ContentPage
 			MainThread.BeginInvokeOnMainThread(() => EpisodeCount.Text = Podcast.EpisodeCount.ToString());
 			return;
 		} else {
+			
+			IFeed feed = null;
 
 			await Task.Run(() =>
 			{
                 Debug.WriteLine("Fetching feed");
                 var factory = new HttpFeedFactory();
-				Podcast.Feed = factory.CreateFeed(new Uri(Podcast.FeedUrl)) as Rss20Feed;
+				feed = factory.CreateFeed(new Uri(Podcast.FeedUrl)) as Rss20Feed;
 				Debug.WriteLine("Feed fetched");
 			});
 
@@ -84,20 +86,20 @@ public partial class PodcastPage : ContentPage
 			{
                 Debug.WriteLine("Updating to Podcast Page");
 
-                Podcast.Description = Podcast.Feed.Description;
+                Podcast.Description = feed.Description;
                 MainThread.BeginInvokeOnMainThread(() => PodcastDescription.Text = "Description:  " + Podcast.Description);
 
-                Podcast.Cover = Podcast.Feed.CoverImageUrl;
+                Podcast.Cover = feed.CoverImageUrl;
 				MainThread.BeginInvokeOnMainThread(() => Cover.Source = Podcast.Cover);
 
-				Podcast.EpisodeCount = Podcast.Feed.Items.Count;
+				Podcast.EpisodeCount = feed.Items.Count;
 				MainThread.BeginInvokeOnMainThread(() => EpisodeCount.Text = "Episodes: " + Podcast.EpisodeCount);
 
-				Podcast.LastPublished = Podcast.Feed.LastUpdated;
+				Podcast.LastPublished = feed.LastUpdated;
 				MainThread.BeginInvokeOnMainThread(() => LastPublished.Text = "Last Published: " + Podcast.LastPublished.ToString());
 
                 Debug.WriteLine("Building Episode list");
-                foreach (var item in Podcast.Feed.Items)
+                foreach (var item in feed.Items)
 				{
 					Episodes.Add(new Episode
 					{

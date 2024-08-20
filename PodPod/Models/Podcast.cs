@@ -7,7 +7,6 @@ public class Podcast
 	public string Title { get; set; }
 	public string FeedUrl { get; set; }
 	public DateTime? LastPublished { get; set; }
-	public Rss20Feed? Feed { get; set; }
 	public string? Description { get; set; }
 	private string? cover;
 	public string? Cover { 
