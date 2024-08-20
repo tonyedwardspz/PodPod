@@ -33,11 +33,7 @@ public partial class LibraryPage : ContentPage
 		Debug.WriteLine("Navigated to Library Page");
         base.OnNavigatedTo(e);
 
-		if (Data.Podcasts.Count > 0)
-		{
-			Podcasts = Data.Podcasts.ToObservableCollection();
-		}
-		else
+		if (Data.Podcasts.Count !> 0)
 		{
 			PrepPodcasts();
 		}

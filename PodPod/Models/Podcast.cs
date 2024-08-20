@@ -1,8 +1,10 @@
-﻿using Podly.FeedParser;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using Podly.FeedParser;
 
 namespace PodPod.Models;
 
-public class Podcast
+public class Podcast : INotifyPropertyChanged
 {
 	public string Title { get; set; }
 	public string FeedUrl { get; set; }
@@ -11,7 +13,10 @@ public class Podcast
 	private string? cover;
 	public string? Cover { 
 		get => cover ?? "cover.png";
-		set => cover = value; 
+		set {
+			cover = value; 
+			OnPropertyChanged();
+		}
 	}
 	public List<Episode> Episodes { get; set; } = new List<Episode>();
 	public int EpisodeCount = 0;
@@ -21,5 +26,34 @@ public class Podcast
 		Title = title;
 		FeedUrl = feedUrl;
 	}
+
+	public event PropertyChangedEventHandler PropertyChanged;
+    protected void OnPropertyChanged([CallerMemberName] string name = null)
+	{
+		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+	}
+
+	// public override bool Equals(object? obj)
+    // {
+    //     if (obj is null || obj is not Podcast)
+    //         return false;
+
+    //     var otherPodcast = (Podcast)obj;
+
+    //     if (Title != otherPodcast.Title || Cover != otherPodcast.Cover || LastPublished != otherPodcast.LastPublished || Description != otherPodcast.Description || FeedUrl != otherPodcast.FeedUrl)
+    //         return false;
+
+    //     return true;
+    // }
+
+    // public static bool operator ==(Podcast x, Podcast y)
+    // {
+    //     return x.Equals(y);
+    // }
+
+    // public static bool operator !=(Podcast x, Podcast y)
+    // {
+    //     return !x.Equals(y);
+    // }
 }
 
