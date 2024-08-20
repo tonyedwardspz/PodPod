@@ -9,13 +9,13 @@
             RowDefinitions="50, 50, 150, Auto, Auto, *"
             ColumnDefinitions="250, *, 150, 100">
 
-        <Image Source="{Binding Podcast.Cover}" x:Name="Cover" Grid.Column="0"  Grid.Row="0" Grid.RowSpan="3" Margin="20,0,20,20"/>
+        <Image Source="{Binding Podcast.Cover}" Grid.Column="0"  Grid.Row="0" Grid.RowSpan="3" Margin="20,0,20,20"/>
         
 
         <VerticalStackLayout Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="4">
-            <Label Text="Episodes: " x:Name="EpisodeCount" FontSize="15" Margin="20,0,20,5" />
-            <Label Text="Last Published: " x:Name="LastPublished" FontSize="15" Margin="20,0,20,5" />
-            <Label Text="Description:  " x:Name="PodcastDescription"  FontSize="14" Margin="20,0,20,5"/>
+            <Label Text="{Binding Podcast.EpisodeCount, StringFormat='Episodes: {0}'}" FontSize="15" Margin="20,0,20,5" />
+            <Label Text="{Binding Podcast.LastPublished, StringFormat='Last Published: {0}'}" FontSize="15" Margin="20,0,20,5" />
+            <Label Text="{Binding Podcast.Description, StringFormat='Description: {0}'}" FontSize="14" Margin="20,0,20,5"/>
         </VerticalStackLayout>
         
         <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4" BackgroundColor="LightGray" HeightRequest="3" Margin="20,0,20,20"/>

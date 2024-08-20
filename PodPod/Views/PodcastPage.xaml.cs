@@ -55,20 +55,9 @@ public partial class PodcastPage : ContentPage
 
         base.OnNavigatedTo(e);
 
-		if (Podcast.Description != null)
-		{
-			MainThread.BeginInvokeOnMainThread(() => PodcastDescription.Text = "Description:  " + Podcast.Description);
-		}
-
-		if (Podcast.Cover != "cover.png")
-		{
-			MainThread.BeginInvokeOnMainThread(() => Cover.Source = Podcast.Cover);
-        }
-
 		if (Podcast.Episodes.Count > 0)
 		{
 			Episodes = new ObservableCollection<Episode>(Podcast.Episodes);
-			MainThread.BeginInvokeOnMainThread(() => EpisodeCount.Text = Podcast.EpisodeCount.ToString());
 			return;
 		} else {
 			
@@ -90,15 +79,7 @@ public partial class PodcastPage : ContentPage
 
                 pod.Description = feed.Description;
 				pod.Cover = feed.CoverImageUrl;
-				pod.EpisodeCount = feed.Items.Count;
 				pod.LastPublished = feed.LastUpdated;
-
-                MainThread.BeginInvokeOnMainThread(() => {
-					PodcastDescription.Text = "Description:  " + pod.Description;
-					Cover.Source = pod.Cover;
-					EpisodeCount.Text = "Episodes: " + pod.EpisodeCount;
-					LastPublished.Text = "Last Published: " + pod.LastPublished.ToString();
-				});
 
 				List<Episode> eps = new List<Episode>();
                 Debug.WriteLine("Building Episode list");

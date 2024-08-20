@@ -6,10 +6,24 @@ namespace PodPod.Models;
 
 public class Podcast : INotifyPropertyChanged
 {
-	public string Title { get; set; }
+	private string? title;
+	public string? Title { 
+		get => title;
+		set {
+			title = value;
+			OnPropertyChanged();
+		}
+	}
 	public string FeedUrl { get; set; }
 	public DateTime? LastPublished { get; set; }
-	public string? Description { get; set; }
+	private string? description;
+	public string? Description { 
+		get => description;
+		set {
+			description = value;
+			OnPropertyChanged();
+		}
+	}
 	private string? cover;
 	public string? Cover { 
 		get => cover ?? "cover.png";
@@ -18,8 +32,16 @@ public class Podcast : INotifyPropertyChanged
 			OnPropertyChanged();
 		}
 	}
-	public List<Episode> Episodes { get; set; } = new List<Episode>();
-	public int EpisodeCount = 0;
+	private List<Episode> episodes = new List<Episode>();
+	public List<Episode> Episodes { 
+		get => episodes;
+		set {
+			episodes = value;
+			OnPropertyChanged("EpisodeCount");
+			OnPropertyChanged();
+		}
+	} 
+	public int EpisodeCount { get => Episodes.Count; }
 
 	public Podcast(string title, string feedUrl)
 	{
@@ -27,33 +49,9 @@ public class Podcast : INotifyPropertyChanged
 		FeedUrl = feedUrl;
 	}
 
-	public event PropertyChangedEventHandler PropertyChanged;
-    protected void OnPropertyChanged([CallerMemberName] string name = null)
+	public event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged([CallerMemberName] string? name = null)
 	{
 		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 	}
-
-	// public override bool Equals(object? obj)
-    // {
-    //     if (obj is null || obj is not Podcast)
-    //         return false;
-
-    //     var otherPodcast = (Podcast)obj;
-
-    //     if (Title != otherPodcast.Title || Cover != otherPodcast.Cover || LastPublished != otherPodcast.LastPublished || Description != otherPodcast.Description || FeedUrl != otherPodcast.FeedUrl)
-    //         return false;
-
-    //     return true;
-    // }
-
-    // public static bool operator ==(Podcast x, Podcast y)
-    // {
-    //     return x.Equals(y);
-    // }
-
-    // public static bool operator !=(Podcast x, Podcast y)
-    // {
-    //     return !x.Equals(y);
-    // }
 }
-
