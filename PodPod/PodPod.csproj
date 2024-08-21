@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFrameworks>net8.0-maccatalyst</TargetFrameworks>
@@ -65,6 +65,7 @@
 	  <None Remove="Views\" />
 	  <None Remove="Services\" />
 	  <None Remove="Resources\Images\cover.png" />
+	  <None Remove="Data\" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -77,6 +78,7 @@
 	  <Folder Include="Models\" />
 	  <Folder Include="Views\" />
 	  <Folder Include="Services\" />
+	  <Folder Include="Data\" />
 	</ItemGroup>
 
 	<ItemGroup>

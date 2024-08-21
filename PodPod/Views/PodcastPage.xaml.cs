@@ -105,8 +105,10 @@ public partial class PodcastPage : ContentPage
                 Debug.WriteLine("Episode list built");
 
 				var index = Data.Podcasts.FindIndex(p => p.Title.ToLower() == pod.Title.ToLower());
-				Data.Podcasts[index] = pod;
 				Podcast = pod;
+
+				Data.Podcasts[index] = pod;
+				Data.SaveToJsonFile(Data.Podcasts, "podcasts");
 			});
 			Debug.WriteLine($"Podcast page: {Podcast.EpisodeCount} episodes of {Podcast.Title} loaded.");
 		}
@@ -123,10 +125,10 @@ public partial class PodcastPage : ContentPage
 				try
 				{
 					MainThread.BeginInvokeOnMainThread(() => button.Text = "Preparing Audio");
-					episode.MediaURL = await DownloadService.DownloadPodcastEpisode(episode.MediaURL, episode.Title);
+					episode.MediaURL = await DownloadService.DownloadPodcastEpisode(episode, Podcast);
 
 					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
-					episode = await TranscriptionService.StartTranslationAsync(episode.MediaURL, episode);
+					episode = await TranscriptionService.StartTranslationAsync(episode.MediaURL, episode, Podcast.FolderName);
 
 					MainThread.BeginInvokeOnMainThread(() => button.IsVisible = false);
 
@@ -134,6 +136,7 @@ public partial class PodcastPage : ContentPage
 					Episodes[index] = episode;
 					Podcast.Episodes = Episodes.ToList();
 					var podIndex = Data.Podcasts.FindIndex(p => p.Title.ToLower() == Podcast.Title.ToLower());
+					
 					Data.Podcasts[podIndex] = Podcast;
 				}
 				catch (Exception err)

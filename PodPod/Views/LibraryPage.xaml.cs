@@ -33,8 +33,9 @@ public partial class LibraryPage : ContentPage
 		Debug.WriteLine("Navigated to Library Page");
         base.OnNavigatedTo(e);
 
-		if (Data.Podcasts.Count == 0)
+		if (Podcasts.Count == 0)
 		{
+			Debug.WriteLine("No podcasts found, loading from OPML");
 			PrepPodcasts();
 		}
 	}

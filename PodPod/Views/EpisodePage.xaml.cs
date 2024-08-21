@@ -113,10 +113,10 @@ public partial class EpisodePage : ContentPage
 		{
 			Episode ep = Episode;
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloading");
-			ep.MediaURL = await DownloadService.DownloadPodcastEpisode(ep.MediaURL, ep.Title);
+			ep.MediaURL = await DownloadService.DownloadPodcastEpisode(ep, Podcast);
 
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
-			ep = await TranscriptionService.StartTranslationAsync(ep.MediaURL, ep);
+			ep = await TranscriptionService.StartTranslationAsync(ep.MediaURL, ep, Podcast.FolderName);
 
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribed");
 			MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
@@ -131,6 +131,7 @@ public partial class EpisodePage : ContentPage
 			
             var podIndex = Data.Podcasts.FindIndex(p => p.Title.ToLower() == Podcast.Title.ToLower());
             Data.Podcasts[podIndex] = Podcast;
+			Data.SaveToJsonFile(Data.Podcasts, "podcasts");
         }
 	}
 
@@ -140,7 +141,7 @@ public partial class EpisodePage : ContentPage
         if (sender is Button button)
         {
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloading");
-			Episode.MediaURL = await DownloadService.DownloadPodcastEpisode(Episode.MediaURL, Episode.Title);
+			Episode.MediaURL = await DownloadService.DownloadPodcastEpisode(Episode, Podcast);
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloaded");
 			MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
         }

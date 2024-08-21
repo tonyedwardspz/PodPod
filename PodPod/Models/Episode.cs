@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace PodPod.Models;
 
@@ -69,6 +70,16 @@ public class Episode : INotifyPropertyChanged
         }
     }
 
+    public string FileName { 
+        get {
+            string fileName = Title.Replace("&", "and");
+            
+		    fileName = System.Text.RegularExpressions.Regex.Replace(fileName, "[^a-zA-Z0-9 ]", "");
+            fileName = System.Text.RegularExpressions.Regex.Replace(fileName, @"\s+", " ");
+            return fileName;
+        }
+    }
+
     public Episode() { }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -76,4 +87,17 @@ public class Episode : INotifyPropertyChanged
 	{
 		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 	}
+
+    public void SaveTranscription(string seriesName, List<Dictionary<string, object>> data)
+    {
+        try {
+            var jsonString = JsonSerializer.Serialize(data);
+            var path = AppPaths.EpisodeTranscriptionFilePath(seriesName, FileName);
+            File.WriteAllText(path, jsonString);
+        } catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+        
+    }
 }

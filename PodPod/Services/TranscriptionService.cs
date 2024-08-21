@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 using FFMpegCore;
 using PodPod.Models;
 using Whisper.net;
@@ -9,12 +10,12 @@ namespace PodPod.Services;
 public static class TranscriptionService
 {
 
-    public static async Task<Episode> StartTranslationAsync(string filePath, Episode episode)
+    public static async Task<Episode> StartTranslationAsync(string filePath, Episode episode, string seriesName)
     {
-        return await Task.Run(() => TranscribePodcastEpisode(filePath, episode));
+        return await Task.Run(() => TranscribePodcastEpisode(filePath, episode, seriesName));
     }
 
-    public static async Task<Episode> TranscribePodcastEpisode(string filePath, Episode episode)
+    public static async Task<Episode> TranscribePodcastEpisode(string filePath, Episode episode, string seriesName)
     {
 
         var spanDataList = new List<Dictionary<string, object>>();
@@ -40,7 +41,7 @@ public static class TranscriptionService
                 Console.WriteLine("Model found in the right place");
             }
 
-            var WavPath = await ConvertMp3ToWav(filePath);
+            var WavPath = await ConvertMp3ToWav(filePath, episode.FileName);
             using var WavStream = File.OpenRead(WavPath);
 
             Console.WriteLine("Creating Whisper Factory at " + DateTime.Now);
@@ -63,7 +64,9 @@ public static class TranscriptionService
             }
             Console.WriteLine("Finished transcription at " + DateTime.Now);
             episode.Transcription = spanDataList;
-            
+
+            _ = Task.Run(() => episode.SaveTranscription(seriesName, spanDataList));
+            _ = Task.Run(() => File.Delete(WavPath));
         }
         catch (Exception e)
         {
@@ -72,12 +75,16 @@ public static class TranscriptionService
         return episode;
     }
 
-    private async static Task<string> ConvertMp3ToWav(string inputFilePath)
+    private async static Task<string> ConvertMp3ToWav(string inputFilePath, string fileName)
     {
         Console.WriteLine("Converting MP3 to WAV");
 
         try {
-            var outputFilePath = Path.ChangeExtension(inputFilePath, ".wav");
+            //var outputFilePath = Path.ChangeExtension(inputFilePath, ".wav");
+
+            var outputFilePath = Path.Combine(AppPaths.TempDirectory, fileName + ".wav");
+
+
             if (File.Exists(outputFilePath))
             {
                 Console.WriteLine("WAV file already exists");
