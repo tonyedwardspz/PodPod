@@ -38,7 +38,7 @@ public class Data
     }
 
     private static bool FirstLoad = true;
-    public static void SaveToJsonFile<T>(T data, string fileName)
+    public static async void SaveToJsonFile<T>(T data, string fileName)
     {
         if(FirstLoad){
             FirstLoad = false;
@@ -47,10 +47,12 @@ public class Data
 
         Debug.WriteLine("Saving to file");
         try {
-            string filePath = Path.Combine(AppPaths.DataDirectory, $"{fileName}.json");
-            string json = JsonSerializer.Serialize(data);
-            File.WriteAllText(filePath, json);
-            Debug.WriteLine("Saved to file");
+            _ = Task.Run(() => {
+                string filePath = Path.Combine(AppPaths.DataDirectory, $"{fileName}.json");
+                string json = JsonSerializer.Serialize(data);
+                File.WriteAllText(filePath, json);
+                Debug.WriteLine("Saved to file");
+            });
         } catch (Exception e){
             Debug.WriteLine(e.Message);
             Debug.WriteLine("Failed to save to file");

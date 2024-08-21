@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using CommunityToolkit.Maui.Views;
+using Microsoft.Maui.Controls.Shapes;
 using Podly.FeedParser;
+using PodPod.Helpers;
 using PodPod.Models;
 using PodPod.Services;
 
@@ -106,6 +108,14 @@ public partial class PodcastPage : ContentPage
 
 				var index = Data.Podcasts.FindIndex(p => p.Title.ToLower() == pod.Title.ToLower());
 				Podcast = pod;
+
+				_ = Task.Run(async () =>{
+					var result = await FileHelper.DownloadImageAsync(pod.Cover, AppPaths.SeriesDirectory(pod.FolderName));
+					if (result != null)
+					{
+						pod.Cover = result;
+					}
+				});
 
 				Data.Podcasts[index] = pod;
 				Data.SaveToJsonFile(Data.Podcasts, "podcasts");

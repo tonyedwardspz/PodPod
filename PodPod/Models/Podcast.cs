@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Podly.FeedParser;
+using PodPod.Helpers;
 
 namespace PodPod.Models;
 
@@ -42,17 +43,12 @@ public class Podcast : INotifyPropertyChanged
 		}
 	} 
 	public int EpisodeCount { get => Episodes.Count; }
-
-	public string FolderName { get; set; }
+	public string FolderName { get => FileHelper.SanitizeFilename(Title); }
 
 	public Podcast(string title, string feedUrl)
 	{
 		Title = title;
 		FeedUrl = feedUrl;
-
-		FolderName = title.Replace("&", "and");
-		FolderName = System.Text.RegularExpressions.Regex.Replace(FolderName, "[^a-zA-Z0-9 ]", "");
-		FolderName = System.Text.RegularExpressions.Regex.Replace(FolderName, @"\s+", " ");
 	}
 
 	public event PropertyChangedEventHandler? PropertyChanged;

@@ -66,6 +66,7 @@
 	  <None Remove="Services\" />
 	  <None Remove="Resources\Images\cover.png" />
 	  <None Remove="Data\" />
+	  <None Remove="Helpers\" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -79,6 +80,7 @@
 	  <Folder Include="Views\" />
 	  <Folder Include="Services\" />
 	  <Folder Include="Data\" />
+	  <Folder Include="Helpers\" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -18,13 +18,20 @@ public static class AppPaths
 
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);
-
+        
+        var directories = new[] { "Episodes", "Transcriptions" };
+        foreach (var directory in directories)
+        {
+            var thisPath = Path.Combine(path, directory);
+            if (!Directory.Exists(thisPath))
+                Directory.CreateDirectory(thisPath);
+        }
         return path;
     }
 
     public static string EpisodeFilePath(string seriesName, string episodeFileName)
     {
-        return Path.Combine(SeriesDirectory(seriesName), episodeFileName + ".mp3");
+        return Path.Combine(SeriesDirectory(seriesName), "Episodes", episodeFileName + ".mp3");
     }
 
     public static string EpisodeTranscriptionFilePath(string seriesName, string episodeFileName)
