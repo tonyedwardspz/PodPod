@@ -25,7 +25,7 @@ public partial class LibraryPage : ContentPage
 	{
 		InitializeComponent();
 		BindingContext = this;
-		Podcasts = Data.Podcasts.ToObservableCollection();
+		Podcasts = Data.Podcasts.ToObservableCollection() ?? new ObservableCollection<Podcast>();
 	}
 
 	protected override void OnNavigatedTo(NavigatedToEventArgs e)

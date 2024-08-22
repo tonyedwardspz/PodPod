@@ -1,11 +1,8 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Podly.FeedParser;
-using PodPod.Helpers;
+﻿using PodPod.Helpers;
 
 namespace PodPod.Models;
 
-public class Podcast : INotifyPropertyChanged
+public class Podcast : Base
 {
 	private string? title;
 	public string? Title { 
@@ -15,7 +12,14 @@ public class Podcast : INotifyPropertyChanged
 			OnPropertyChanged();
 		}
 	}
-	public string FeedUrl { get; set; }
+	private string feedUrl;
+	public string FeedUrl { 
+		get => feedUrl;
+		set {
+			feedUrl = FileHelper.RemoveQueryParams(value);
+			OnPropertyChanged();
+		}
+	}
 	public DateTime? LastPublished { get; set; }
 	private string? description;
 	public string? Description { 
@@ -29,7 +33,7 @@ public class Podcast : INotifyPropertyChanged
 	public string? Cover { 
 		get => cover ?? "cover.png";
 		set {
-			cover = value; 
+			cover = FileHelper.RemoveQueryParams(value);
 			OnPropertyChanged();
 		}
 	}
@@ -49,11 +53,5 @@ public class Podcast : INotifyPropertyChanged
 	{
 		Title = title;
 		FeedUrl = feedUrl;
-	}
-
-	public event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged([CallerMemberName] string? name = null)
-	{
-		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 	}
 }

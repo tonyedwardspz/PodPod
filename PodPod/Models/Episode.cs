@@ -1,11 +1,9 @@
-﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
+﻿using System.Text.Json;
+using PodPod.Helpers;
 
 namespace PodPod.Models;
 
-public class Episode : INotifyPropertyChanged
+public class Episode : Base
 {
     public string? Id { get; set; }
     public string? Title { get; set; }
@@ -13,7 +11,7 @@ public class Episode : INotifyPropertyChanged
     public string? MediaURL { 
         get => mediaURL; 
         set {
-            mediaURL = value;
+            mediaURL = FileHelper.RemoveQueryParams(value);
             OnPropertyChanged("NeedsDownloading");
         } 
     }
@@ -33,9 +31,23 @@ public class Episode : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-    public string? Cover { get; set; }
+    private string cover;
+    public string? Cover { 
+        get => cover ?? "cover.png";
+        set {
+            cover = FileHelper.RemoveQueryParams(value);
+            OnPropertyChanged();
+        }
+    }
     public string? Author { get; set; }
-    public string? Link { get; set; }
+    private string link;
+    public string? Link { 
+        get => link;
+        set {
+            link = FileHelper.RemoveQueryParams(value);
+            OnPropertyChanged();
+        }
+    }
     private DateTime? published { get; set; }
     public DateTime? Published { 
         get => published;
@@ -69,26 +81,9 @@ public class Episode : INotifyPropertyChanged
                 return true;
         }
     }
-
-    public string FileName { 
-        get {
-            string fileName = Title.Replace("&", "and");
-            
-		    fileName = System.Text.RegularExpressions.Regex.Replace(fileName, "[^a-zA-Z0-9 ]", "");
-            fileName = System.Text.RegularExpressions.Regex.Replace(fileName, @"\s+", " ");
-            return fileName;
-        }
-    }
-
+    public string FileName { get => FileHelper.SanitizeFilename(Title); }
     public bool Played { get; set; } = false;
-
     public Episode() { }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged([CallerMemberName] string? name = null)
-	{
-		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-	}
 
     public void SaveTranscription(string seriesName, List<Dictionary<string, object>> data)
     {
@@ -100,6 +95,5 @@ public class Episode : INotifyPropertyChanged
         {
             Console.WriteLine(e.Message);
         }
-        
     }
 }
