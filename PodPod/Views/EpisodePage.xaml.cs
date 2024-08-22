@@ -155,16 +155,8 @@ public partial class EpisodePage : ContentPage
 			{
 				if (Shell.Current is AppShell shell)
 				{
-					MediaElement player = shell.GetPlayer();
-					shell.CurrentEpisode = Episode;
-					player.Source = Episode?.MediaURL;
-					player.Play();
-
-					Label details = shell.GetPodcastDetails();
-					details.Text = $"Series: {Podcast.Title}";
-
-					Label episodeDetails = shell.GetEpisodeDetails();
-					episodeDetails.Text = $"Episode: {episode?.Title}";
+					var nextEpisodes = Podcast.Episodes.SkipWhile(ep => ep.Title != Episode.Title).Skip(1).Take(10).ToList();
+					shell.PlayMedia(episode, nextEpisodes, Podcast.Title);
 				}
 			});
         }

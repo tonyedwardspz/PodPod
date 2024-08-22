@@ -41,8 +41,11 @@
                 Grid.Row="2"
                 Grid.ColumnSpan="4"
                 MediaOpened="OnMediaOpened"
+                MediaEnded="OnMediaEnded"
                 ShouldShowPlaybackControls="False"
-                PositionChanged="OnPositionChanged"/>
+                PositionChanged="OnPositionChanged"
+                ShouldAutoPlay="True"
+                />
 
             <Slider
                 x:Name="PositionSlider"

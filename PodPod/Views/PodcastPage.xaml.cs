@@ -185,50 +185,25 @@ public partial class PodcastPage : ContentPage
             var episode = button.BindingContext as Episode;
             if (episode != null)
             {
-                await MainThread.InvokeOnMainThreadAsync(() =>
-                {
-                    if (Shell.Current is AppShell shell)
-					{
-						MediaElement player = shell.GetPlayer();
-						shell.CurrentEpisodeList = Episodes;
-						shell.CurrentEpisode = episode;
-						player.Source = episode?.MediaURL;
-						player.Play();
-
-						Label details = shell.GetPodcastDetails();
-						details.Text = $"Series: {Podcast.Title}";
-
-						Label episodeDetails = shell.GetEpisodeDetails();
-						episodeDetails.Text = $"Episode: {episode?.Title}";
-					}
-                });
+				if (Shell.Current is AppShell shell)
+				{
+					var nextEpisodes = Episodes.SkipWhile(e => e.Id != episode.Id).Skip(1).Take(10).ToList();
+					shell.PlayMedia(episode, nextEpisodes, Podcast.Title);
+				}
             }
         }
     }
 
-	public async void PlayNextEpisode(object sender, EventArgs e)
+	public void PlayNextEpisode(object sender, EventArgs e)
 	{
 		var episode = Episodes.FirstOrDefault(e => e.Played == false);
-
 		if (episode != null)
 		{
-			await MainThread.InvokeOnMainThreadAsync(() =>
+			if (Shell.Current is AppShell shell)
 			{
-				if (Shell.Current is AppShell shell)
-				{
-					MediaElement player = shell.GetPlayer();
-					shell.CurrentEpisodeList = Episodes;
-					shell.CurrentEpisode = episode;
-					player.Source = episode?.MediaURL;
-					player.Play();
-
-					Label details = shell.GetPodcastDetails();
-					details.Text = $"Series: {Podcast.Title}";
-
-					Label episodeDetails = shell.GetEpisodeDetails();
-					episodeDetails.Text = $"Episode: {episode?.Title}";
-				}
-			});
+				var nextEpisodes = Episodes.SkipWhile(e => e.Id != episode.Id).Skip(1).Take(10).ToList();
+				shell.PlayMedia(episode, nextEpisodes, Podcast.Title);
+			}
 		}
 
 	}

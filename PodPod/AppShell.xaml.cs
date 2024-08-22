@@ -1,9 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Maui.Core.Primitives;
 using CommunityToolkit.Maui.Views;
 using PodPod.Models;
+using PodPod.Services;
 
 namespace PodPod;
 
@@ -26,21 +28,6 @@ public partial class AppShell : Shell
         Debug.WriteLine($"Navigation to {args.Target.Location} started");
 
         Player.PropertyChanged += Player_PropertyChanged;
-    }
-
-    public Label GetPodcastDetails()
-    {
-        return PodcastDetails;
-    }
-
-    public Label GetEpisodeDetails()
-    {
-        return EpisodeDetails;
-    }
-
-    public MediaElement GetPlayer()
-    {
-        return Player;
     }
 
 	void Player_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -99,15 +86,19 @@ public partial class AppShell : Shell
 
     void OnNextClicked(object sender, EventArgs e)
     {
+        PlayNextPlaylistItem();
+    }
+
+    void PlayNextPlaylistItem()
+    {
         var index = Playlist.IndexOf(CurrentEpisode);
-       
         Debug.WriteLine($"Current Index: {index}");
         if (index < Playlist.Count - 1)
         {
             CurrentEpisode = Playlist[index + 1];
             Player.Source = CurrentEpisode.MediaURL;
             Player.Play();
-            UpdatePlayList();
+            UpdatePlayList(true);
         }
     }
 
@@ -123,39 +114,28 @@ public partial class AppShell : Shell
 
         PositionLabel.Text = Player.Position.ToString(@"hh\:mm\:ss");
         DurationLabel.Text = Player.Duration.ToString(@"hh\:mm\:ss");
-
-        UpdatePlayList();
     }
-
     
-    void UpdatePlayList()
+    void UpdatePlayList(bool playlistSelection)
     {
         ObservableCollection<Episode> tmpEpisodeList = new ObservableCollection<Episode>();
-        if (playlistSelection)
+        if (playlistSelection && Playlist.Count > 0)
             tmpEpisodeList = new ObservableCollection<Episode>(Playlist);
         else
             tmpEpisodeList = new ObservableCollection<Episode>(CurrentEpisodeList);
 
         Playlist.Clear();
-        playlistSelection = false;
 
         foreach (var episode in tmpEpisodeList)
         {
-            if (episode == CurrentEpisode)
+            if (episode != CurrentEpisode)
             {
-                int i = tmpEpisodeList.IndexOf(episode) + 1;
-                for ( int j = i;  j < tmpEpisodeList.Count ; j++)
-                {
-                    Playlist.Add(tmpEpisodeList[j]);
-                    if (j > i + 20)
-                    {
-                        break;
-                    }
-                }
-                break;
+                Playlist.Add(episode);
+
+                if (Playlist.Count > 10)
+                    break;
             }
         }
-
         PlaylistArea.Clear();
 
         var count = 0;
@@ -189,26 +169,42 @@ public partial class AppShell : Shell
         Debug.WriteLine($"Playlist length: {Playlist.Count}");
     }
 
+    public async void PlayMedia(Episode episode, List<Episode> Episodes, string PodcastTitle = "")
+    {
+        await MainThread.InvokeOnMainThreadAsync(() =>
+        {
+            CurrentEpisodeList = Episodes.ToObservableCollection();
+            CurrentEpisode = episode;
+            Player.Source = episode?.MediaURL;
+            Player.Play();
+            EpisodeDetails.Text = $"Episode: {episode?.Title}";
+
+            if (PodcastTitle != "")
+            {
+                PodcastDetails.Text = $"Series: {PodcastTitle}";
+                UpdatePlayList(true);
+            } else
+            {
+                UpdatePlayList(false);
+            }
+        });
+    }
+
+    void OnMediaEnded(object? sender, EventArgs e)
+    {
+        Debug.WriteLine("Media ended.");
+        OnNextClicked(sender, e);
+        CurrentEpisode.Played = true;
+        Data.SaveToJsonFile(Data.Podcasts, "podcasts");
+        PlayNextPlaylistItem();
+    }
     
     private void OnPlaylistItemClicked(object sender)
     {
-        playlistSelection = true;
         var lbl = (Label)sender;
         var episode = Playlist.Where(episode => episode.Title == lbl.Text).FirstOrDefault();
-        Debug.WriteLine($"Episode Selected: {episode?.Title}");
-
-        if (Shell.Current is AppShell shell)
-        {
-            MediaElement player = shell.GetPlayer();
-            shell.CurrentEpisodeList = Playlist;//
-            shell.CurrentEpisode = episode;
-            player.Source = episode?.MediaURL;
-            player.Play();
-
-            Label episodeDetails = shell.GetEpisodeDetails();
-            episodeDetails.Text = $"Episode: {episode?.Title}";
-        }
+        Debug.WriteLine($"Episode Selected from playlist: {episode?.Title}");
+        if (episode != null)
+            PlayMedia(episode, Playlist.ToList());
     }
-
 }
-

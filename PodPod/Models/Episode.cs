@@ -80,6 +80,8 @@ public class Episode : INotifyPropertyChanged
         }
     }
 
+    public bool Played { get; set; } = false;
+
     public Episode() { }
 
     public event PropertyChangedEventHandler? PropertyChanged;

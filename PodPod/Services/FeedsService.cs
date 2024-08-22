@@ -47,7 +47,7 @@ public static class FeedsService
         try
         {
             var uri = new Uri(url);
-            MainThread.BeginInvokeOnMainThread(() =>  Browser.Default.OpenAsync(uri, BrowserLaunchMode.SystemPreferred))§;
+            MainThread.BeginInvokeOnMainThread(() => Browser.Default.OpenAsync(uri, BrowserLaunchMode.SystemPreferred));
         }
         catch (Exception ex)
         {
