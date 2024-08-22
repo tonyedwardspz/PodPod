@@ -20,7 +20,23 @@ public class Podcast : Base
 			OnPropertyChanged();
 		}
 	}
-	public DateTime? LastPublished { get; set; }
+	public DateTime? LastChecked { get; set; }
+	private DateTime? lastPublished;
+	public DateTime? LastPublished { 
+		get => lastPublished;
+		set {
+			lastPublished = value;
+			OnPropertyChanged();
+		}
+	}
+	public bool NeedsChecking()
+    {
+        if (LastChecked == null || LastPublished == null)
+        {
+            return true;
+        }
+        return LastChecked < LastPublished;
+    }
 	private string? description;
 	public string? Description { 
 		get => description;

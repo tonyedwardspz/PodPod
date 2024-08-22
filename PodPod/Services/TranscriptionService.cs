@@ -10,12 +10,12 @@ namespace PodPod.Services;
 public static class TranscriptionService
 {
 
-    public static async Task<Episode> StartTranslationAsync(string filePath, Episode episode, string seriesName)
+    public static async Task<bool> StartTranscriptionAsync(Episode episode, string seriesName)
     {
-        return await Task.Run(() => TranscribePodcastEpisode(filePath, episode, seriesName));
+        return await Task.Run(() => TranscribePodcastEpisode(episode.MediaURL, episode, seriesName));
     }
 
-    public static async Task<Episode> TranscribePodcastEpisode(string filePath, Episode episode, string seriesName)
+    public static async Task<bool> TranscribePodcastEpisode(string filePath, Episode episode, string seriesName)
     {
 
         var spanDataList = new List<Dictionary<string, object>>();
@@ -67,12 +67,13 @@ public static class TranscriptionService
 
             _ = Task.Run(() => episode.SaveTranscription(seriesName, spanDataList));
             _ = Task.Run(() => File.Delete(WavPath));
+            return true;
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
         }
-        return episode;
+        return false;
     }
 
     private async static Task<string> ConvertMp3ToWav(string inputFilePath, string fileName)
@@ -80,10 +81,7 @@ public static class TranscriptionService
         Console.WriteLine("Converting MP3 to WAV");
 
         try {
-            //var outputFilePath = Path.ChangeExtension(inputFilePath, ".wav");
-
             var outputFilePath = Path.Combine(AppPaths.TempDirectory, fileName + ".wav");
-
 
             if (File.Exists(outputFilePath))
             {

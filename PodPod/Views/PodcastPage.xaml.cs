@@ -12,19 +12,8 @@ namespace PodPod.Views;
 [QueryProperty(nameof(Podcast), nameof(Podcast))]
 public partial class PodcastPage : ContentPage
 {
-	private ObservableCollection<Episode> episodes = new ObservableCollection<Episode>();
-	public ObservableCollection<Episode> Episodes
-	{
-		get { return episodes; }
-		set
-		{
-			episodes = value;
-			OnPropertyChanged(nameof(Episodes));
-		}
-	}
-
-	private Podcast podcast;
-	public Podcast Podcast
+	private Podcast? podcast;
+	public Podcast? Podcast
 	{
 		get { return podcast; }
 		set
@@ -34,7 +23,7 @@ public partial class PodcastPage : ContentPage
 		}
 	}
 
-	public Podcast SelectedPodcast { get; set; }
+	public Podcast? SelectedPodcast { get; set; }
 
 	bool PageLoaded = false;
 
@@ -53,75 +42,10 @@ public partial class PodcastPage : ContentPage
 	protected override async void OnNavigatedTo(NavigatedToEventArgs e)
     {
 		Debug.WriteLine("Navigated to Podcast Page");
-		PageLoaded = true;
-
-        base.OnNavigatedTo(e);
-
-		if (Podcast.Episodes.Count > 0)
-		{
-			Episodes = new ObservableCollection<Episode>(Podcast.Episodes);
-			return;
-		} else {
-			
-			IFeed feed = null;
-
-			await Task.Run(() =>
-			{
-                Debug.WriteLine("Fetching feed");
-                var factory = new HttpFeedFactory();
-				feed = factory.CreateFeed(new Uri(Podcast.FeedUrl)) as Rss20Feed;
-				Debug.WriteLine("Feed fetched");
-			});
-
-			await Task.Run(() =>
-			{
-                Debug.WriteLine("Updating to Podcast Page");
-
-				Podcast pod = Podcast;
-
-                pod.Description = feed.Description;
-				pod.Cover = feed.CoverImageUrl;
-				pod.LastPublished = feed.LastUpdated;
-
-				List<Episode> eps = new List<Episode>();
-                Debug.WriteLine("Building Episode list");
-                foreach (var item in feed.Items)
-				{
-					eps.Add(new Episode
-					{
-						Id = item.Id,
-						Title = item.Title,
-						MediaURL = item.MediaUrl,
-						Description = item.Content,
-						Published = item.DatePublished,
-						Cover = item.Cover,
-						Author = item.Author,
-						Link = item.Link,
-						EpisodeNumber = item.EpisodeNumber,
-						Duration = item.MediaLength
-					});
-				}
-				pod.Episodes = eps;
-				Episodes = new ObservableCollection<Episode>(eps);
-				
-                Debug.WriteLine("Episode list built");
-
-				var index = Data.Podcasts.FindIndex(p => p.Title.ToLower() == pod.Title.ToLower());
-				Podcast = pod;
-
-				_ = Task.Run(async () =>{
-					var result = await FileHelper.DownloadImageAsync(pod.Cover, AppPaths.SeriesDirectory(pod.FolderName));
-					if (result != null)
-					{
-						pod.Cover = result;
-					}
-				});
-
-				Data.Podcasts[index] = pod;
-				Data.SaveToJsonFile(Data.Podcasts, "podcasts");
-			});
-			Debug.WriteLine($"Podcast page: {Podcast.EpisodeCount} episodes of {Podcast.Title} loaded.");
-		}
+		base.OnNavigatedTo(e);
+		PageLoaded = true; // Prevents a extra write of the json file
+		FeedsService.FetchFeed(Podcast);
+		Debug.WriteLine($"Podcast page: {Podcast.EpisodeCount} episodes of {Podcast.Title} loaded.");
     }
 
 	public async void TranscribeEpisode(object sender, EventArgs e){
@@ -135,18 +59,17 @@ public partial class PodcastPage : ContentPage
 				try
 				{
 					MainThread.BeginInvokeOnMainThread(() => button.Text = "Preparing Audio");
-					episode.MediaURL = await DownloadService.DownloadPodcastEpisode(episode, Podcast);
+					await DownloadService.DownloadPodcastEpisode(episode, Podcast.FolderName);
 
 					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
-					episode = await TranscriptionService.StartTranslationAsync(episode.MediaURL, episode, Podcast.FolderName);
+					await TranscriptionService.StartTranscriptionAsync(episode, Podcast.FolderName);
 
 					MainThread.BeginInvokeOnMainThread(() => button.IsVisible = false);
 
-					var index = Episodes.IndexOf(episode);
-					Episodes[index] = episode;
-					Podcast.Episodes = Episodes.ToList();
+					var index = Podcast.Episodes.IndexOf(episode);
+					Podcast.Episodes[index] = episode;
+
 					var podIndex = Data.Podcasts.FindIndex(p => p.Title.ToLower() == Podcast.Title.ToLower());
-					
 					Data.Podcasts[podIndex] = Podcast;
 				}
 				catch (Exception err)
@@ -178,7 +101,7 @@ public partial class PodcastPage : ContentPage
         }
     }
 
-	public async void PlayEpisode(object sender, EventArgs e)
+	public void PlayEpisode(object sender, EventArgs e)
 	{
         if (sender is Button button)
         {
@@ -187,7 +110,7 @@ public partial class PodcastPage : ContentPage
             {
 				if (Shell.Current is AppShell shell)
 				{
-					var nextEpisodes = Episodes.SkipWhile(e => e.Id != episode.Id).Skip(1).Take(10).ToList();
+					var nextEpisodes = Podcast.Episodes.SkipWhile(e => e.Id != episode.Id).Skip(1).Take(10).ToList();
 					shell.PlayMedia(episode, nextEpisodes, Podcast.Title);
 				}
             }
@@ -196,16 +119,15 @@ public partial class PodcastPage : ContentPage
 
 	public void PlayNextEpisode(object sender, EventArgs e)
 	{
-		var episode = Episodes.FirstOrDefault(e => e.Played == false);
+		var episode = Podcast.Episodes.FirstOrDefault(e => e.Played == false);
 		if (episode != null)
 		{
 			if (Shell.Current is AppShell shell)
 			{
-				var nextEpisodes = Episodes.SkipWhile(e => e.Id != episode.Id).Skip(1).Take(10).ToList();
+				var nextEpisodes = Podcast.Episodes.SkipWhile(e => e.Id != episode.Id).Skip(1).Take(10).ToList();
 				shell.PlayMedia(episode, nextEpisodes, Podcast.Title);
 			}
 		}
-
 	}
 
 	public async void ViewRSSFeed(object sender, EventArgs e)

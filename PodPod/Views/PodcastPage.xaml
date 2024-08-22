@@ -38,7 +38,7 @@
             Grid.Row="6"
             Grid.Column="0"
             Grid.ColumnSpan="4"
-            ItemsSource="{Binding Episodes}"
+            ItemsSource="{Binding Podcast.Episodes}"
             SelectionMode="Single"
             SelectionChanged="Episode_SelectionChanged"
             SelectedItem="SelectedEpisode"

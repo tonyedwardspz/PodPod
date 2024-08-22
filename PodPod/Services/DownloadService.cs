@@ -6,11 +6,11 @@ namespace PodPod.Services;
 
 public static class DownloadService
 {
-    public static Task<string> DownloadPodcastEpisode(Episode episode, Podcast podcast)
+    public static Task<bool> DownloadPodcastEpisode(Episode episode, string folderName)
     {
-        string filePath = AppPaths.EpisodeFilePath(podcast.FolderName, episode.FileName);
+        string filePath = AppPaths.EpisodeFilePath(folderName, episode.FileName);
 
-        if (File.Exists(filePath)) return Task.FromResult(filePath);
+        if (File.Exists(filePath)) return Task.FromResult(false);
         try
         {
             using (var client = new HttpClient())
@@ -25,20 +25,14 @@ public static class DownloadService
                             stream.CopyTo(fileStream);
                         }
                     }
-                    return Task.FromResult(filePath);
-                }
-                else
-                {
-                    // TODO: Handle error much better than this
-                    return Task.FromResult(episode.MediaURL);
+                    episode.MediaURL = filePath;
+                    return Task.FromResult(true);
                 }
             }
         } catch (Exception e)
         {
-            // TODO: Handle error much better than this
             Debug.WriteLine(e.Message);
-            return Task.FromResult(episode.MediaURL);
         }
+        return Task.FromResult(false);
     }
-
 }

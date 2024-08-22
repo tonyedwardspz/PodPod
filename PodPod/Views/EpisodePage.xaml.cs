@@ -113,10 +113,10 @@ public partial class EpisodePage : ContentPage
 		{
 			Episode ep = Episode;
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloading");
-			ep.MediaURL = await DownloadService.DownloadPodcastEpisode(ep, Podcast);
+			await DownloadService.DownloadPodcastEpisode(ep, Podcast.FolderName);
 
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
-			ep = await TranscriptionService.StartTranslationAsync(ep.MediaURL, ep, Podcast.FolderName);
+			await TranscriptionService.StartTranscriptionAsync(ep, Podcast.FolderName);
 
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribed");
 			MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
@@ -141,7 +141,7 @@ public partial class EpisodePage : ContentPage
         if (sender is Button button)
         {
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloading");
-			Episode.MediaURL = await DownloadService.DownloadPodcastEpisode(Episode, Podcast);
+			await DownloadService.DownloadPodcastEpisode(Episode, Podcast.FolderName);
 			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloaded");
 			MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
         }
