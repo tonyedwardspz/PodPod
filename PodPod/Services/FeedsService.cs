@@ -41,5 +41,18 @@ public static class FeedsService
         return podcasts;
     }
 
+    public async static void ShowRSSFeed(string url)
+    {
+        Console.WriteLine("Showing RSS Feed");
+        try
+        {
+            var uri = new Uri(url);
+            MainThread.BeginInvokeOnMainThread(() =>  Browser.Default.OpenAsync(uri, BrowserLaunchMode.SystemPreferred))§;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error opening RSS feed: {ex.Message}");
+        }
+    }
 }
 

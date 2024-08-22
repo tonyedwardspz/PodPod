@@ -7,13 +7,14 @@ public class FileHelper
 {
 	public FileHelper() {}
 
-    public static string SanitizeFilename(string filename, string colonReplacement = " - ")
+    public static string SanitizeFilename(string filename)
     {
         if (string.IsNullOrEmpty(filename))
             return string.Empty;
 
         const int MAX_FILENAME = 200;
         const string REPLACEMENT = "";
+        string colonReplacement = " - ";
 
         var sanitized = filename;
         sanitized = sanitized.Replace(":", colonReplacement);

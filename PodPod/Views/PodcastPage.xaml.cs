@@ -206,6 +206,39 @@ public partial class PodcastPage : ContentPage
         }
     }
 
+	public async void PlayNextEpisode(object sender, EventArgs e)
+	{
+		var episode = Episodes.FirstOrDefault(e => e.Played == false);
+
+		if (episode != null)
+		{
+			await MainThread.InvokeOnMainThreadAsync(() =>
+			{
+				if (Shell.Current is AppShell shell)
+				{
+					MediaElement player = shell.GetPlayer();
+					shell.CurrentEpisodeList = Episodes;
+					shell.CurrentEpisode = episode;
+					player.Source = episode?.MediaURL;
+					player.Play();
+
+					Label details = shell.GetPodcastDetails();
+					details.Text = $"Series: {Podcast.Title}";
+
+					Label episodeDetails = shell.GetEpisodeDetails();
+					episodeDetails.Text = $"Episode: {episode?.Title}";
+				}
+			});
+		}
+
+	}
+
+	public async void ViewRSSFeed(object sender, EventArgs e)
+	{
+		Debug.WriteLine("Show RSS Feed Clicked");
+		FeedsService.ShowRSSFeed(Podcast.FeedUrl);
+	}
+
 	public async void Episode_SelectionChanged(object sender, SelectionChangedEventArgs e)
 	{
 		if (!PageLoaded) return;

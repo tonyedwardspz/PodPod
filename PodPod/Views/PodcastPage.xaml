@@ -6,7 +6,7 @@
              Title="PodcastPage">
 
     <Grid Padding="10,20,20,0"
-            RowDefinitions="50, 50, 150, Auto, Auto, *"
+            RowDefinitions="50, 50, 150, Auto, Auto, Auto, *"
             ColumnDefinitions="250, *, 150, 100">
 
         <Image Source="{Binding Podcast.Cover}" Grid.Column="0"  Grid.Row="0" Grid.RowSpan="3" Margin="20,0,20,20"/>
@@ -20,8 +20,22 @@
         
         <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4" BackgroundColor="LightGray" HeightRequest="3" Margin="20,0,20,20"/>
 
+        <HorizontalStackLayout Grid.Row="5" Margin="20,0,20,20" >
+
+                <Button
+                    Text="Play Latest Episode"
+                    Clicked="PlayNextEpisode"
+                    Margin="0,0,5,0"/>
+
+                <Button
+                    Text="View RSS Feed"
+                    Clicked="ViewRSSFeed"
+                    Margin="0,0,5,0"/>
+            
+            </HorizontalStackLayout>
+
         <CollectionView
-            Grid.Row="5"
+            Grid.Row="6"
             Grid.Column="0"
             Grid.ColumnSpan="4"
             ItemsSource="{Binding Episodes}"
