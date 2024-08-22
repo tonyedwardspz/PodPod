@@ -2,7 +2,7 @@
 
 namespace PodPod.Services;
 
-public static class HTMLService
+public static class HTMLHelper
 {
     public static List<View> ProcessHTML(string TheHTML)
     {
@@ -245,4 +245,3 @@ public static class HTMLService
         return stackLayout;
     }
 }
-

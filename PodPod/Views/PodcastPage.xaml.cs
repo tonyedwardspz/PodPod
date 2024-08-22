@@ -1,9 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
-using CommunityToolkit.Maui.Views;
-using Microsoft.Maui.Controls.Shapes;
-using Podly.FeedParser;
-using PodPod.Helpers;
+﻿using System.Diagnostics;
 using PodPod.Models;
 using PodPod.Services;
 
@@ -36,15 +31,23 @@ public partial class PodcastPage : ContentPage
 	protected override void OnAppearing()
 	{
 		base.OnAppearing();
+
+		if (Podcast == null) return;
 		this.Title = $"Podcast: {Podcast.Title}";
 	}
 
 	protected override async void OnNavigatedTo(NavigatedToEventArgs e)
     {
+		if (Podcast == null) return;
+
 		Debug.WriteLine("Navigated to Podcast Page");
 		base.OnNavigatedTo(e);
 		PageLoaded = true; // Prevents a extra write of the json file
-		FeedsService.FetchFeed(Podcast);
+
+		await Task.Run(async () =>
+		{
+			await FeedsService.FetchFeed(Podcast);
+		});
 		Debug.WriteLine($"Podcast page: {Podcast.EpisodeCount} episodes of {Podcast.Title} loaded.");
     }
 
@@ -54,7 +57,7 @@ public partial class PodcastPage : ContentPage
 		if (sender is Button button)
 		{
 			var episode = button.BindingContext as Episode;
-			if (episode != null && episode.Transcription == null)
+			if (episode != null && episode.Transcription == null && Podcast != null)
 			{
 				try
 				{
@@ -83,6 +86,9 @@ public partial class PodcastPage : ContentPage
 	public async void ViewEpisode(object sender, EventArgs e)
 	{
 		Debug.WriteLine($"View episode clicked");
+
+		if (Podcast == null) return;
+
         if (sender is Button button)
         {
             var episode = button.BindingContext as Episode;
@@ -106,7 +112,7 @@ public partial class PodcastPage : ContentPage
         if (sender is Button button)
         {
             var episode = button.BindingContext as Episode;
-            if (episode != null)
+            if (episode != null && Podcast != null)
             {
 				if (Shell.Current is AppShell shell)
 				{
@@ -119,6 +125,8 @@ public partial class PodcastPage : ContentPage
 
 	public void PlayNextEpisode(object sender, EventArgs e)
 	{
+		if (Podcast == null) return;
+
 		var episode = Podcast.Episodes.FirstOrDefault(e => e.Played == false);
 		if (episode != null)
 		{
@@ -130,9 +138,11 @@ public partial class PodcastPage : ContentPage
 		}
 	}
 
-	public async void ViewRSSFeed(object sender, EventArgs e)
+	public void ViewRSSFeed(object sender, EventArgs e)
 	{
 		Debug.WriteLine("Show RSS Feed Clicked");
+		if (Podcast == null) return;
+		
 		FeedsService.ShowRSSFeed(Podcast.FeedUrl);
 	}
 
@@ -141,6 +151,8 @@ public partial class PodcastPage : ContentPage
 		if (!PageLoaded) return;
 
 		var episode = e.CurrentSelection.FirstOrDefault() as Episode;
+		if (episode == null || Podcast == null) return;
+		
 		Debug.WriteLine($"Episode Selected: {episode?.Title}");
 
 		try

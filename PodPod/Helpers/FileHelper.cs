@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
-using FFMpegCore;
 
 namespace PodPod.Helpers;
 
@@ -44,51 +43,5 @@ public class FileHelper
     {
         if (url.Contains("?")) url = url.Substring(0, url.IndexOf("?"));
         return url;
-    }
-
-    public static async Task<string> DownloadImageAsync(string imageUrl, string filePath)
-    {
-        using (var httpClient = new HttpClient())
-        { 
-            Debug.WriteLine("Downloading image: " + imageUrl);
-            try
-            {
-                byte[] imageData = await httpClient.GetByteArrayAsync(imageUrl);
-
-                // Get file extension and file name
-                string fileExtension = Path.GetExtension(imageUrl);
-                string fileName = "Cover" + fileExtension;
-
-                // Save the cover in the temporary folder
-                string tempFilePath = Path.Combine(AppPaths.TempDirectory, "cover" + fileExtension);
-                if (File.Exists(tempFilePath))
-                    File.Delete(tempFilePath);
-                await File.WriteAllBytesAsync(tempFilePath, imageData);
-
-                // Resize the image to 1000xN
-                string newFilePath = Path.Combine(filePath, fileName);
-                await FFMpegArguments
-                    .FromFileInput(tempFilePath)
-                    .OutputToFile(newFilePath, true, options => options
-                         .WithVideoFilters(filterOptions => {
-                             filterOptions.Scale(1500, -1);
-                         }
-                    ))
-                    .ProcessAsynchronously(true, new FFOptions { BinaryFolder = "/opt/homebrew/bin" });
-
-                // Delete the temporary file if needed
-                if (File.Exists(tempFilePath))
-                    File.Delete(tempFilePath);
-
-                return newFilePath;
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine("Error downloading or processing image: " + imageUrl);
-                Debug.WriteLine(e.Message);
-                return imageUrl;
-            }
-
-        }
     }
 }

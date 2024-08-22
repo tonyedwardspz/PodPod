@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using OPMLCore.NET;
 using Podly.FeedParser;
-using PodPod.Helpers;
 using PodPod.Models;
 namespace PodPod.Services;
 
@@ -57,8 +56,10 @@ public static class FeedsService
         }
     }
 
-    public static async void FetchFeed(Podcast pod){
-		IFeed feed = null;
+    public static async 
+    Task
+FetchFeed(Podcast pod){
+		Rss20Feed feed = new Rss20Feed();
 
 		await Task.Run(() =>
 		{
@@ -68,12 +69,13 @@ public static class FeedsService
 			Debug.WriteLine("Feed fetched");
 		});
 
-		if (pod.LastChecked != null || feed.LastUpdated != null)
+		if (pod.LastChecked != null){
 			if (pod.LastChecked > feed.LastUpdated)
 			{
 				pod.LastChecked = DateTime.Now;
                 return;
             }
+        }
 				
 
 		await Task.Run(() =>
@@ -107,7 +109,7 @@ public static class FeedsService
 			Debug.WriteLine("Episode list built");
 
 			_ = Task.Run(async () =>{
-				var result = await FileHelper.DownloadImageAsync(pod.Cover, AppPaths.SeriesDirectory(pod.FolderName));
+				var result = await DownloadService.DownloadImageAsync(pod.Cover, AppPaths.SeriesDirectory(pod.FolderName));
 				if (result != null)
 				{
 					pod.Cover = result;

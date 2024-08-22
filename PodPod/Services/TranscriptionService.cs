@@ -1,9 +1,6 @@
-﻿using System;
-using System.Text.Json;
-using FFMpegCore;
+﻿using FFMpegCore;
 using PodPod.Models;
 using Whisper.net;
-using Whisper.net.Ggml;
 
 namespace PodPod.Services;
 
