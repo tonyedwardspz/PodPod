@@ -95,10 +95,9 @@ public partial class AppShell : Shell
         Debug.WriteLine($"Current Index: {index}");
         if (index < Playlist.Count - 1)
         {
-            CurrentEpisode = Playlist[index + 1];
-            Player.Source = CurrentEpisode.MediaURL;
-            Player.Play();
-            UpdatePlayList(true);
+            Episode item = Playlist[index + 1];
+            Playlist.Remove(CurrentEpisode);
+            PlayMedia(item, Playlist.ToList());
         }
     }
 
@@ -193,7 +192,6 @@ public partial class AppShell : Shell
     void OnMediaEnded(object? sender, EventArgs e)
     {
         Debug.WriteLine("Media ended.");
-        OnNextClicked(sender, e);
         CurrentEpisode.Played = true;
         Data.SaveToJsonFile(Data.Podcasts, "podcasts");
         PlayNextPlaylistItem();
