@@ -18,7 +18,7 @@ public partial class PodcastPage : ContentPage
 		}
 	}
 
-	public Podcast? SelectedPodcast { get; set; }
+	public Episode? SelectedEpisode { get; set; }
 
 	bool PageLoaded = false;
 
@@ -48,6 +48,10 @@ public partial class PodcastPage : ContentPage
 		{
 			await FeedsService.FetchFeed(Podcast);
 		});
+
+		VerticalStackLayout stackLayout = HTMLHelper.ProcessHTML(Podcast.Description);
+        DescriptionContainer.Children.Add(stackLayout);
+
 		Debug.WriteLine($"Podcast page: {Podcast.EpisodeCount} episodes of {Podcast.Title} loaded.");
     }
 
@@ -67,13 +71,10 @@ public partial class PodcastPage : ContentPage
 					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
 					await TranscriptionService.StartTranscriptionAsync(episode, Podcast.FolderName);
 
-					MainThread.BeginInvokeOnMainThread(() => button.IsVisible = false);
-
-					var index = Podcast.Episodes.IndexOf(episode);
-					Podcast.Episodes[index] = episode;
-
-					var podIndex = Data.Podcasts.FindIndex(p => p.Title.ToLower() == Podcast.Title.ToLower());
-					Data.Podcasts[podIndex] = Podcast;
+					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribed");
+					MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
+					
+                    Data.SaveToJsonFile(Data.Podcasts, "podcasts");
 				}
 				catch (Exception err)
 				{
@@ -150,10 +151,8 @@ public partial class PodcastPage : ContentPage
 	{
 		if (!PageLoaded) return;
 
-		var episode = e.CurrentSelection.FirstOrDefault() as Episode;
-		if (episode == null || Podcast == null) return;
-		
-		Debug.WriteLine($"Episode Selected: {episode?.Title}");
+        var ep = e.CurrentSelection.FirstOrDefault() as Episode;
+		Episode episode = Podcast.Episodes.FirstOrDefault(e => e.Id == ep?.Id);
 
 		try
 		{
@@ -163,8 +162,7 @@ public partial class PodcastPage : ContentPage
 					["Episode"] = episode,
 					["Podcast"] = Podcast
 				});
-			SelectedPodcast = null;
-
+			SelectedEpisode = null;
 		} catch (Exception err)
 		{
 			Debug.WriteLine(err.Message);

@@ -41,11 +41,9 @@ public partial class EpisodePage : ContentPage
     {
 		Debug.WriteLine("Navigated to " + Episode.Title);
         base.OnNavigatedTo(e);
-		
-		if (Episode.Transcription != null){	
-			TranscriptionContainer.Children.Clear();
-			TranscriptionContainer.Children.Add(updateTranscription(Episode));
-		} 
+
+		VerticalStackLayout stackLayout = HTMLHelper.ProcessHTML(Episode.Description);
+        DescriptionContainer.Children.Add(stackLayout);
 	}
 
 	protected override void OnAppearing()
@@ -54,84 +52,33 @@ public partial class EpisodePage : ContentPage
 		this.Title = $"Episode: {Episode.Title}";
 	}
 
-	public VerticalStackLayout updateTranscription(Episode episode)
-	{
-		VerticalStackLayout transcriptionContainer = new VerticalStackLayout();
-		transcriptionContainer.HorizontalOptions = LayoutOptions.FillAndExpand;
-
-		try
-		{
-			bool PartSentence = false;
-			Label partLabel = new Label();
-            foreach (var spanData in Episode.Transcription)
-            {
-                Label label = new Label();
-				label.FontSize = 16;
-				label.HorizontalTextAlignment = TextAlignment.Start;
-				label.VerticalTextAlignment = TextAlignment.Center;
-                label.FormattedText = new FormattedString();
-
-				TimeSpan start = (TimeSpan)spanData["Start"];
-				string formattedTime = start.ToString(@"hh\:mm\:ss");
-
-				if(PartSentence){
-					partLabel.FormattedText.Spans[2].Text += $" {spanData["Text"]}";
-					label = partLabel;
-					PartSentence = false;
-				} else {
-					var span = new Span{ Text = $"{formattedTime}"};
-					label.FormattedText.Spans.Add(span);
-
-					span = new Span{ Text = " - "};
-					label.FormattedText.Spans.Add(span);
-
-					span = new Span{ Text = $"{spanData["Text"]}"};
-					label.FormattedText.Spans.Add(span);
-				}
-
-				string text = spanData["Text"].ToString().Trim();
-				if (text.EndsWith(".") || text.EndsWith("?") || text.EndsWith("!") || text.EndsWith("]")){
-					PartSentence = false;
-					transcriptionContainer.Children.Add(label);
-				} else {
-					PartSentence = true;
-					partLabel = label;
-				}
-            }
-        } catch (Exception e)
-		{
-			Debug.WriteLine(e.Message);
-		}
-		return transcriptionContainer;
-	}
-
 	public async void TranscribeEpisode(object sender, EventArgs e){
-		Debug.WriteLine("Transcribe Episode Clicked at " + new DateTime().ToShortDateString());
+		Debug.WriteLine("Transcribe Episode Clicked at " + DateTime.Now);
 
 		if (sender is Button button)
 		{
-			Episode ep = Episode;
-			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloading");
-			await DownloadService.DownloadPodcastEpisode(ep, Podcast.FolderName);
+			var episode = button.BindingContext as Episode;
+			if (episode != null && episode.Transcription == null && Podcast != null)
+			{
+				try
+				{
+					MainThread.BeginInvokeOnMainThread(() => button.Text = "Preparing Audio");
+					await DownloadService.DownloadPodcastEpisode(episode, Podcast.FolderName);
 
-			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
-			await TranscriptionService.StartTranscriptionAsync(ep, Podcast.FolderName);
+					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
+					await TranscriptionService.StartTranscriptionAsync(episode, Podcast.FolderName);
 
-			MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribed");
-			MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
-
-			TranscriptionContainer.Clear();
-			TranscriptionContainer.Add(updateTranscription(ep));
-
-			Episode = ep;
-
-			var epIndex = Podcast.Episodes.FindIndex(p => p.Title.ToLower() == Episode.Title.ToLower());
-			Podcast.Episodes[epIndex] = ep;
-			
-            var podIndex = Data.Podcasts.FindIndex(p => p.Title.ToLower() == Podcast.Title.ToLower());
-            Data.Podcasts[podIndex] = Podcast;
-			Data.SaveToJsonFile(Data.Podcasts, "podcasts");
-        }
+					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribed");
+					MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
+					
+                    Data.SaveToJsonFile(Data.Podcasts, "podcasts");
+				}
+				catch (Exception err)
+				{
+					Debug.WriteLine(err.Message);
+				}
+			}
+		}
 	}
 
 	public async void DownloadEpisode(object sender, EventArgs e)

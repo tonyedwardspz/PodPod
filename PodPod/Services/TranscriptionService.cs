@@ -14,7 +14,7 @@ public static class TranscriptionService
 
     public static async Task<bool> TranscribePodcastEpisode(string filePath, Episode episode, string seriesName)
     {
-
+        
         var spanDataList = new List<Dictionary<string, object>>();
         try
         {
@@ -50,19 +50,22 @@ public static class TranscriptionService
                 .Build();
 
             Console.WriteLine("Starting transcription at " + DateTime.Now);
+            List<TranscriptionItem> items = new List<TranscriptionItem>();
             await foreach (var result in processor.ProcessAsync(WavStream))
             {
-                spanDataList.Add(new Dictionary<string, object>
+                items.Add(new TranscriptionItem
                 {
-                    { "Start", result.Start },
-                    { "End", result.End },
-                    { "Text", result.Text }
+                    Start = result.Start,
+                    End = result.End,
+                    Text = result.Text
                 });
             }
+            
             Console.WriteLine("Finished transcription at " + DateTime.Now);
-            episode.Transcription = spanDataList;
+            Transcription transcript = new Transcription { Items = items};
+            episode.Transcription = transcript;
 
-            _ = Task.Run(() => episode.SaveTranscription(seriesName, spanDataList));
+            _ = Task.Run(() => episode.SaveTranscription(seriesName, episode.Transcription));
             _ = Task.Run(() => File.Delete(WavPath));
             return true;
         }

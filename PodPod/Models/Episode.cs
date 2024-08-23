@@ -12,6 +12,7 @@ public class Episode : Base
         get => mediaURL; 
         set {
             mediaURL = FileHelper.RemoveQueryParams(value);
+            OnPropertyChanged();
             OnPropertyChanged("NeedsDownloading");
         } 
     }
@@ -65,17 +66,18 @@ public class Episode : Base
             OnPropertyChanged();
         }
     }
-    private List<Dictionary<string, object>>? transcription;
-    public List<Dictionary<string, object>>? Transcription { 
+    private Transcription? transcription;
+    public Transcription? Transcription { 
         get => transcription; 
         set {
             transcription = value;
+            OnPropertyChanged();
             OnPropertyChanged("NeedsTranscribing");
         }
     }
     public bool NeedsTranscribing { 
         get {
-            if (Transcription != null && Transcription.Count > 0)
+            if (Transcription != null && Transcription.Items.Count > 0)
                 return false;
             else
                 return true;
@@ -85,7 +87,7 @@ public class Episode : Base
     public bool Played { get; set; } = false;
     public Episode() { }
 
-    public void SaveTranscription(string seriesName, List<Dictionary<string, object>> data)
+    public void SaveTranscription(string seriesName, Transcription data)
     {
         try {
             var jsonString = JsonSerializer.Serialize(data);

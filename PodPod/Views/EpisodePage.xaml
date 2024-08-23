@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:PodPod.Models"
              x:Class="PodPod.Views.EpisodePage"
              Title="EpisodePage">
     
@@ -15,7 +16,7 @@
             <VerticalStackLayout Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="2">
                 <Label Text="{Binding Episode.Published, StringFormat='Published: {0}'}" FontSize="16" Margin="20,0,20,5"/>
                 <Label Text="{Binding Episode.Duration, StringFormat='Duration: {0}'}" FontSize="16" Margin="20,0,20,5"/>
-                <Label Text="{Binding Episode.Description}" FontSize="16" Margin="20,0,20,5" />
+                <VerticalStackLayout x:Name="DescriptionContainer" Margin="20,0,20,5" ></VerticalStackLayout>
             </VerticalStackLayout>
 
             <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" BackgroundColor="LightGray" HeightRequest="3" Margin="20,0,20,20"/>
@@ -41,10 +42,29 @@
                     />
             
             </HorizontalStackLayout>
+            
+            <CollectionView
+                Grid.Row="4"
+                Grid.Column="0"
+                Grid.ColumnSpan="4"
+                ItemsSource="{Binding Episode.Transcription.Items}"
+                SelectionMode="Single">
+                
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
+                </CollectionView.ItemsLayout>
 
-            <VerticalStackLayout x:Name="TranscriptionContainer" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="4" Margin="20,0,20,10" HorizontalOptions="FillAndExpand">
-                <Label Text="Transcription not available yet. Start it above." FontSize="16" />
-            </VerticalStackLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:TranscriptionItem">
+                        <Grid ColumnDefinitions="80,80,*">
+                            <Label Text="{Binding Start, StringFormat='{0:hh\\:mm\\:ss}'}" Grid.Column="0" />
+                            <Label Text="{Binding End, StringFormat='{0:hh\\:mm\\:ss}'}" Grid.Column="1" />
+                            <Label Text="{Binding Text}" Grid.Column="2" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
         </Grid>
     </ScrollView>
 </ContentPage>

@@ -13,9 +13,9 @@
         
 
         <VerticalStackLayout Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="4">
-            <Label Text="{Binding Podcast.EpisodeCount, StringFormat='Episodes: {0}'}" FontSize="15" Margin="20,0,20,5" />
-            <Label Text="{Binding Podcast.LastPublished, StringFormat='Last Published: {0}'}" FontSize="15" Margin="20,0,20,5" />
-            <Label Text="{Binding Podcast.Description, StringFormat='Description: {0}'}" FontSize="14" Margin="20,0,20,5"/>
+            <Label Text="{Binding Podcast.EpisodeCount, StringFormat='Episodes: {0}'}" FontSize="15" Margin="20,5,20,5" />
+            <Label Text="{Binding Podcast.LastPublished, StringFormat='Last Published: {0}'}" FontSize="15" Margin="20,5,20,5" />
+            <VerticalStackLayout x:Name="DescriptionContainer" Margin="20,0,20,5" ></VerticalStackLayout>
         </VerticalStackLayout>
         
         <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4" BackgroundColor="LightGray" HeightRequest="3" Margin="20,0,20,20"/>
