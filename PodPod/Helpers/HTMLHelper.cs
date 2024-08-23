@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using ObjCRuntime;
 
 namespace PodPod.Services;
 
@@ -45,6 +46,8 @@ public static class HTMLHelper
         return stackLayout;
     }
 
+   
+
     public static Label CreateSpans(string str, Label label, Style? bodyTextSpanStyle)
     {
         bool hasMatched = false;
@@ -59,125 +62,39 @@ public static class HTMLHelper
             string insideLink = linkMatch.Groups[3].Value.Trim();
             string afterLink = linkMatch.Groups[4].Value.Trim();
 
-            Span span = new Span();
-            if (!string.IsNullOrEmpty(beforeLink))
+            LinkObject linkObject = new LinkObject
             {
-
-                span = new Span
-                {
-                    Text = beforeLink,
-                    Style = bodyTextSpanStyle
-                };
-                label.FormattedText.Spans.Add(span);
-            }
-
-            if (insideLink.Contains("<em>"))
-            {
-                int emIndex = insideLink.IndexOf("<em>");
-                insideLink = insideLink.Remove(emIndex, 4);
-            }
-            if (insideLink.Contains("</em>"))
-            {
-                int emEndIndex = insideLink.IndexOf("</em>");
-                insideLink = insideLink.Remove(emEndIndex, 5);
-            }
-
-            if (insideLink.Contains("<strong>"))
-            {
-                int strongIndex = insideLink.IndexOf("<strong>");
-                insideLink = insideLink.Remove(strongIndex, 8);
-            }
-            if (insideLink.Contains("</strong>"))
-            {
-                int strongEndIndex = insideLink.IndexOf("</strong>");
-                insideLink = insideLink.Remove(strongEndIndex, 9);
-            }
-
-            string text = insideLink;
-            if (beforeLink.Length > 1)
-            {
-                span.Text = $"{span.Text} ";
-            }
-
-            Console.WriteLine($"Span Link: {insideLink}: {url}");
-            Span linkSpan = new Span
-            {
-                Text = text,
-                Style = Application.Current.Resources["BodyTextLinkSpan"] as Style
+                BeforeLink = beforeLink,
+                Url = url,
+                InsideLink = insideLink,
+                AfterLink = afterLink
             };
-            linkSpan.GestureRecognizers.Add(new TapGestureRecognizer
-            {
-                Command = new Command(async () => await Browser.OpenAsync(new Uri(url), BrowserLaunchMode.SystemPreferred))
-            });
-            label.FormattedText.Spans.Add(linkSpan);
-
-            if (afterLink.Length > 1)
-            {
-                label.FormattedText.Spans.Add(new Span
-                {
-                    Text = " ",
-                    Style = bodyTextSpanStyle
-                });
-            }
-
-            if (!string.IsNullOrEmpty(afterLink.Trim()))
-            {
-                return CreateSpans(afterLink.Trim(), label, bodyTextSpanStyle);
-            }
+            return ProcessLink(label, bodyTextSpanStyle, linkObject);
         }
 
-        string strongPattern = @"^(.*?)<(?:em|strong)>(.*?)</(?:em|strong)>(.*)$";
-        Match strongMatch = Regex.Match(str.Trim(), strongPattern, RegexOptions.Singleline);
+        string pattern = @"(?<!<a\s[^>]*?>)(?<before>.*?)(?<url>https?:\/\/\S+?)(?<after>(\s.*?|$))(?![^<]*<\/a>)";
 
-        if (strongMatch.Success && hasMatched == false && !str.ToLower().Contains("what3words"))
+
+        Match NonAnchorLink = Regex.Match(str, pattern);
+
+        if (NonAnchorLink.Success && hasMatched == false)
         {
+            string before = NonAnchorLink.Groups["before"].Value.Trim();
+            string url = NonAnchorLink.Groups["url"].Value.Trim();
+            string after = NonAnchorLink.Groups["after"].Value.Trim();
+
             hasMatched = true;
-            string beforeEm = strongMatch.Groups[1].Value.TrimStart();
-            string insideEm = strongMatch.Groups[2].Value.Trim();
-            string afterEm = strongMatch.Groups[3].Value.Trim();
 
-            if (beforeEm.Length > 0)
+            LinkObject linkObject = new LinkObject
             {
-                //Console.WriteLine($"Span: {beforeEm}");
-                Span span = new Span
-                {
-                    Text = beforeEm,
-                    Style = bodyTextSpanStyle
-                };
-                label.FormattedText.Spans.Add(span);
-            }
-
-            if (insideEm.StartsWith("<em>"))
-                insideEm = insideEm.Substring(4);
-            if (insideEm.StartsWith("<strong>"))
-                insideEm = insideEm.Substring(8);
-
-            string text = insideEm;
-            if (afterEm.Length > 1)
-            {
-                text += " ";
-            }
-
-            //Console.WriteLine($"Span Bold: {text}");
-            Span span1 = new Span
-            {
-                Text = text,
-                Style = Application.Current?.Resources["BodyTextBoldSpan"] as Style
+                BeforeLink = before,
+                Url = url,
+                InsideLink = url,
+                AfterLink = after
             };
-            label.FormattedText.Spans.Add(span1);
-
-            // This isn't doing what I think. I think??
-            if (afterEm.Trim().ToLower() == "</strong>")
-                afterEm = afterEm.Substring(9).Trim();
-            if (afterEm.Trim().ToLower() == "</em>")
-                afterEm = afterEm.Substring(5).Trim();
-
-            if (afterEm.Length > 0)
-            {
-                //Console.WriteLine($"Span left over: {afterEm}");
-                return CreateSpans(afterEm, label, bodyTextSpanStyle);
-            }
-        }
+            return ProcessLink(label, bodyTextSpanStyle, linkObject);
+        } 
+        
         if (!hasMatched)
         {
             //Console.WriteLine($"Span: {str}");
@@ -208,7 +125,78 @@ public static class HTMLHelper
                 label.FormattedText.Spans.Add(span);
             }
         }
+        return label;
+    }
 
+    private static Label ProcessLink(Label label, Style? bodyTextSpanStyle, LinkObject link)
+    {
+        Span span = new Span();
+        if (!string.IsNullOrEmpty(link.BeforeLink))
+        {
+            span = new Span
+            {
+                Text = link.BeforeLink,
+                Style = bodyTextSpanStyle
+            };
+            label.FormattedText.Spans.Add(span);
+        }
+
+        if (!string.IsNullOrEmpty(link.InsideLink))
+        {
+
+            if (link.InsideLink.Contains("<em>"))
+            {
+                int emIndex = link.InsideLink.IndexOf("<em>");
+                link.InsideLink = link.InsideLink.Remove(emIndex, 4);
+            }
+            if (link.InsideLink.Contains("</em>"))
+            {
+                int emEndIndex = link.InsideLink.IndexOf("</em>");
+                link.InsideLink = link.InsideLink.Remove(emEndIndex, 5);
+            }
+
+            if (link.InsideLink.Contains("<strong>"))
+            {
+                int strongIndex = link.InsideLink.IndexOf("<strong>");
+                link.InsideLink = link.InsideLink.Remove(strongIndex, 8);
+            }
+            if (link.InsideLink.Contains("</strong>"))
+            {
+                int strongEndIndex = link.InsideLink.IndexOf("</strong>");
+                link.InsideLink = link.InsideLink.Remove(strongEndIndex, 9);
+            }
+        } else {
+            link.InsideLink = link.Url;
+        }
+
+        // add a space before the link if there is text before it
+        if (link.BeforeLink.Length > 1)
+        {
+            span.Text = $"{span.Text} ";
+        }
+
+        Span linkSpan = new Span
+        {
+            Text = link.InsideLink,
+            Style = Application.Current.Resources["BodyTextLinkSpan"] as Style
+        };
+        linkSpan.GestureRecognizers.Add(new TapGestureRecognizer
+        {
+            Command = new Command(async () => await Browser.OpenAsync(new Uri(link.Url)))
+        });
+        label.FormattedText.Spans.Add(linkSpan);
+
+        if (link.AfterLink.Length > 1)
+        {
+            label.FormattedText.Spans.Add(new Span
+            {
+                Text = " ",
+                Style = bodyTextSpanStyle
+            });
+            return CreateSpans(link.AfterLink, label, bodyTextSpanStyle);
+        } else {
+            label.FormattedText.Spans.Last().Text += link.AfterLink;
+        }
         return label;
     }
 
@@ -244,3 +232,11 @@ public static class HTMLHelper
         return stackLayout;
     }
 }
+
+ public class LinkObject
+    {
+        public string BeforeLink { get; set; }
+        public string Url { get; set; }
+        public string InsideLink { get; set; }
+        public string AfterLink { get; set; }
+    }
