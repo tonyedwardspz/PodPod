@@ -4,13 +4,10 @@ namespace PodPod.Services;
 
 public static class HTMLHelper
 {
-    public static List<View> ProcessHTML(string TheHTML)
+    public static VerticalStackLayout ProcessHTML(string TheHTML)
     {
-        //var stackLayout = new VerticalStackLayout();
-        //stackLayout.Padding = new Thickness(0, 0, 0, 15);
-        //Console.WriteLine($"");
-
-        List<View> stackLayout = new List<View>();
+        VerticalStackLayout stackLayout = new VerticalStackLayout();
+        Style? bodyTextSpanStyle = Application.Current?.Resources["BodyTextSpan"] as Style;
 
         string pattern = @"<(?<tag>\w+)[^>]*>(?<content>.*?)<\/\k<tag>>";
         MatchCollection matches = Regex.Matches(TheHTML, pattern, RegexOptions.Singleline);
@@ -19,27 +16,31 @@ public static class HTMLHelper
         {
             string tagName = match.Groups["tag"].Value;
             string content = match.Groups["content"].Value;
-
             Console.WriteLine($"-- Update Content Match: {tagName}");
-
-            Style? bodyTextSpanStyle = Application.Current?.Resources["BodyTextSpan"] as Style;
 
             if (tagName == "p")
             {
                 Label label = new Label();
                 label.FormattedText = new FormattedString();
                 label = CreateSpans(content, label, bodyTextSpanStyle);
-                stackLayout.Add(label);
+                stackLayout.Children.Add(label);
             }
             else if (tagName == "ul")
             {
                 VerticalStackLayout ul = processUL(content, bodyTextSpanStyle);
-                stackLayout.Add(ul);
+                stackLayout.Children.Add(ul);
             }
             else
             {
                 Console.WriteLine($"No path found for {tagName}: {content}");
             }
+        }
+        if (matches.Count == 0)
+        {
+            Label label = new();
+            label.FormattedText = new FormattedString();
+            label = CreateSpans(TheHTML, label, bodyTextSpanStyle);
+            stackLayout.Children.Add(label);
         }
         return stackLayout;
     }
@@ -47,7 +48,6 @@ public static class HTMLHelper
     public static Label CreateSpans(string str, Label label, Style? bodyTextSpanStyle)
     {
         bool hasMatched = false;
-
         string linkPattern = @"^(.*?)<a\b[^>]*?href=['""](.*?)['""][^>]*>(.*?)<\/a>(.*)$";
         Match linkMatch = Regex.Match(str, linkPattern, RegexOptions.Singleline);
 
@@ -98,7 +98,6 @@ public static class HTMLHelper
             {
                 span.Text = $"{span.Text} ";
             }
-            // 
 
             Console.WriteLine($"Span Link: {insideLink}: {url}");
             Span linkSpan = new Span
@@ -139,7 +138,7 @@ public static class HTMLHelper
 
             if (beforeEm.Length > 0)
             {
-                Console.WriteLine($"Span: {beforeEm}");
+                //Console.WriteLine($"Span: {beforeEm}");
                 Span span = new Span
                 {
                     Text = beforeEm,
@@ -159,7 +158,7 @@ public static class HTMLHelper
                 text += " ";
             }
 
-            Console.WriteLine($"Span Bold: {text}");
+            //Console.WriteLine($"Span Bold: {text}");
             Span span1 = new Span
             {
                 Text = text,
@@ -175,13 +174,13 @@ public static class HTMLHelper
 
             if (afterEm.Length > 0)
             {
-                Console.WriteLine($"Span left over: {afterEm}");
+                //Console.WriteLine($"Span left over: {afterEm}");
                 return CreateSpans(afterEm, label, bodyTextSpanStyle);
             }
         }
         if (!hasMatched)
         {
-            Console.WriteLine($"Span: {str}");
+            //Console.WriteLine($"Span: {str}");
             if (str.Contains("</br>"))
             {
                 string[] parts = str.Split(new string[] { "</br>" }, StringSplitOptions.None);
@@ -215,7 +214,7 @@ public static class HTMLHelper
 
     public static VerticalStackLayout processUL(string str, Style? bodyTextSpanStyle)
     {
-        Console.WriteLine("");
+        //Console.WriteLine("");
         string pattern = @"<(?<tag>\w+)[^>]*>(?<content>.*?)<\/\k<tag>>";
         MatchCollection matches = Regex.Matches(str, pattern, RegexOptions.Singleline);
 
@@ -237,7 +236,7 @@ public static class HTMLHelper
                 else
                 {
                     label.Text = "- " + content;
-                    Console.WriteLine($"LI: {content}");
+                    //Console.WriteLine($"LI: {content}");
                 }
             }
             stackLayout.Children.Add(label);
