@@ -55,28 +55,18 @@ public partial class EpisodePage : ContentPage
 	public async void TranscribeEpisode(object sender, EventArgs e){
 		Debug.WriteLine("Transcribe Episode Clicked at " + DateTime.Now);
 
-		if (sender is Button button)
+		if (Episode != null && Episode.Transcription == null && Podcast != null)
 		{
-			var episode = button.BindingContext as Episode;
-			if (episode != null && episode.Transcription == null && Podcast != null)
+			try
 			{
-				try
-				{
-					MainThread.BeginInvokeOnMainThread(() => button.Text = "Preparing Audio");
-					await DownloadService.DownloadPodcastEpisode(episode, Podcast.FolderName);
-
-					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
-					await TranscriptionService.StartTranscriptionAsync(episode, Podcast.FolderName);
-
-					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribed");
-					MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
-					
-                    Data.SaveToJsonFile(Data.Podcasts, "podcasts");
-				}
-				catch (Exception err)
-				{
-					Debug.WriteLine(err.Message);
-				}
+				Episode.TranscriptionButtonText = "Preparing";
+				await DownloadService.DownloadPodcastEpisode(Episode, Podcast.FolderName);
+				await TranscriptionService.StartTranscriptionAsync(Episode, Podcast.FolderName);
+				Data.SaveToJsonFile(Data.Podcasts, "podcasts");
+			}
+			catch (Exception err)
+			{
+				Debug.WriteLine(err.Message);
 			}
 		}
 	}
@@ -84,27 +74,15 @@ public partial class EpisodePage : ContentPage
 	public async void DownloadEpisode(object sender, EventArgs e)
 	{
 		Debug.WriteLine($"Download episode clicked");
-        if (sender is Button button)
-        {
-			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloading");
-			await DownloadService.DownloadPodcastEpisode(Episode, Podcast.FolderName);
-			MainThread.BeginInvokeOnMainThread(() => button.Text = "Downloaded");
-			MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
-        }
+        await DownloadService.DownloadPodcastEpisode(Episode, Podcast.FolderName);
     }
 
 	public async void PlayEpisode(object sender, EventArgs e)
 	{
-        if (sender is Button button)
-        {
-            await MainThread.InvokeOnMainThreadAsync(() =>
-			{
-				if (Shell.Current is AppShell shell)
-				{
-					var nextEpisodes = Podcast.Episodes.SkipWhile(ep => ep.Title != Episode.Title).Skip(1).Take(10).ToList();
-					shell.PlayMedia(episode, nextEpisodes, Podcast.Title);
-				}
-			});
-        }
+		if (Shell.Current is AppShell shell)
+		{
+			var nextEpisodes = Podcast.Episodes.SkipWhile(ep => ep.Title != Episode.Title).Skip(1).Take(10).ToList();
+			shell.PlayMedia(episode, nextEpisodes, Podcast.Title);
+		}
     }
 }

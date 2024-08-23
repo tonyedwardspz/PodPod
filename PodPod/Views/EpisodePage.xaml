@@ -29,13 +29,13 @@
                     Margin="0,0,5,0"/>
 
                 <Button
-                    Text="Download"
+                    Text="{Binding Episode.DownloadButtonText}"
                     Clicked="DownloadEpisode"
                     Margin="0,0,5,0"
                     IsEnabled="{Binding Episode.NeedsDownloading }"/>
 
                 <Button
-                    Text="Transcribe"
+                    Text="{Binding Episode.TranscriptionButtonText}"
                     Clicked="TranscribeEpisode"
                     IsEnabled="{Binding Episode.NeedsTranscribing }"
                     Margin="0,0,5,0"
@@ -48,7 +48,8 @@
                 Grid.Column="0"
                 Grid.ColumnSpan="4"
                 ItemsSource="{Binding Episode.Transcription.Items}"
-                SelectionMode="Single">
+                SelectionMode="Single"
+                Margin="20,0,20,20">
                 
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />

@@ -7,34 +7,40 @@ namespace PodPod.Services;
 
 public static class DownloadService
 {
-    public static Task<bool> DownloadPodcastEpisode(Episode episode, string folderName)
+    public static async  Task<bool> DownloadPodcastEpisode(Episode episode, string folderName)
     {
         string filePath = AppPaths.EpisodeFilePath(folderName, episode.FileName);
 
-        if (File.Exists(filePath)) return Task.FromResult(false);
+        if (File.Exists(filePath)) return false;
         try
         {
-            using (var client = new HttpClient())
+            episode.DownloadButtonText = "Downloading";
+
+            await Task.Run(() =>
             {
-                var response = client.GetAsync(new Uri(episode.MediaURL)).Result;
-                if (response.IsSuccessStatusCode)
+                using (var client = new HttpClient())
                 {
-                    using (var stream = response.Content.ReadAsStreamAsync().Result)
+                    var response = client.GetAsync(new Uri(episode.MediaURL)).Result;
+                    if (response.IsSuccessStatusCode)
                     {
-                        using (var fileStream = File.Create(filePath))
+                        using (var stream = response.Content.ReadAsStreamAsync().Result)
                         {
-                            stream.CopyTo(fileStream);
+                            using (var fileStream = File.Create(filePath))
+                            {
+                                stream.CopyTo(fileStream);
+                            }
                         }
+                        episode.MediaURL = filePath;
+                        episode.DownloadButtonText = "Downloaded";
                     }
-                    episode.MediaURL = filePath;
-                    return Task.FromResult(true);
                 }
-            }
+            });
+            return true;
         } catch (Exception e)
         {
             Debug.WriteLine(e.Message);
         }
-        return Task.FromResult(false);
+        return false;
     }
 
     public static async Task<string> DownloadImageAsync(string imageUrl, string filePath)

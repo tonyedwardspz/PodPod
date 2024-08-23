@@ -14,6 +14,7 @@ public class Episode : Base
             mediaURL = FileHelper.RemoveQueryParams(value);
             OnPropertyChanged();
             OnPropertyChanged("NeedsDownloading");
+            OnPropertyChanged("DownloadButtonText");
         } 
     }
     public bool NeedsDownloading { 
@@ -24,6 +25,21 @@ public class Episode : Base
                 return false;
         }
     }
+    private string downloadButtonText { get; set; } = "Download";
+    public string DownloadButtonText { 
+        get { 
+
+            if (!NeedsDownloading && downloadButtonText == "Download")
+                return "Downloaded";
+            else
+                return downloadButtonText;            
+        }
+        set {
+            downloadButtonText = value;
+            OnPropertyChanged();
+        }
+    }
+
     private string? description;
     public string? Description { 
         get => description;
@@ -83,9 +99,28 @@ public class Episode : Base
                 return true;
         }
     }
+    private string transcriptionButtonText { get; set; } = "Transcribe";
+    public string TranscriptionButtonText { 
+        get {
+            
+            if (!NeedsTranscribing && transcriptionButtonText == "Transcribe")
+                return "Transcribed";
+            else
+                return transcriptionButtonText;
+        }
+        set {
+            transcriptionButtonText = value;
+            OnPropertyChanged("NeedsTranscribing");
+            OnPropertyChanged();
+        }
+    }
     public string FileName { get => FileHelper.SanitizeFilename(Title); }
     public bool Played { get; set; } = false;
-    public Episode() { }
+    public Episode() { 
+        if (TranscriptionButtonText == "Preparing"){
+            TranscriptionButtonText = "Transcribe";
+        }
+    }
 
     public void SaveTranscription(string seriesName, Transcription data)
     {

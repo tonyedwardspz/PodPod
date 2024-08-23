@@ -65,16 +65,10 @@ public partial class PodcastPage : ContentPage
 			{
 				try
 				{
-					MainThread.BeginInvokeOnMainThread(() => button.Text = "Preparing Audio");
+					episode.TranscriptionButtonText = "Preparing";
 					await DownloadService.DownloadPodcastEpisode(episode, Podcast.FolderName);
-
-					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribing");
 					await TranscriptionService.StartTranscriptionAsync(episode, Podcast.FolderName);
-
-					MainThread.BeginInvokeOnMainThread(() => button.Text = "Transcribed");
-					MainThread.BeginInvokeOnMainThread(() => button.IsEnabled = false);
-					
-                    Data.SaveToJsonFile(Data.Podcasts, "podcasts");
+					Data.SaveToJsonFile(Data.Podcasts, "podcasts");
 				}
 				catch (Exception err)
 				{

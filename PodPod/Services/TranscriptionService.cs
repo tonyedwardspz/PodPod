@@ -33,18 +33,13 @@ public static class TranscriptionService
                     }
                 }
             }
-            else
-            {
-                Console.WriteLine("Model found in the right place");
-            }
 
             var WavPath = await ConvertMp3ToWav(filePath, episode.FileName);
             using var WavStream = File.OpenRead(WavPath);
 
-            Console.WriteLine("Creating Whisper Factory at " + DateTime.Now);
-            using var whisperFactory = WhisperFactory.FromPath(destPath);
+            episode.TranscriptionButtonText = "Transcribing";
 
-            Console.WriteLine("Creating Processor " + DateTime.Now);
+            using var whisperFactory = WhisperFactory.FromPath(destPath);
             using var processor = whisperFactory.CreateBuilder()
                 .WithLanguage("en")
                 .Build();
@@ -63,6 +58,7 @@ public static class TranscriptionService
             
             Console.WriteLine("Finished transcription at " + DateTime.Now);
             Transcription transcript = new Transcription { Items = items};
+            episode.TranscriptionButtonText = "Transcribed";
             episode.Transcription = transcript;
 
             _ = Task.Run(() => episode.SaveTranscription(seriesName, episode.Transcription));
