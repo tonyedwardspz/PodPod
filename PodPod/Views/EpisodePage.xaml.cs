@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Windows.Input;
 using PodPod.Models;
 using PodPod.Services;
 
@@ -85,4 +86,35 @@ public partial class EpisodePage : ContentPage
 			shell.PlayMedia(episode, nextEpisodes, Podcast.Title);
 		}
     }
+
+	public ICommand TimeTappedCommand => new Command<string>(async (timestamp) => {
+		Debug.WriteLine($"Timestamp Clicked: {timestamp} of {Episode.Title}");
+
+		if (timestamp == "00:00:00")
+			timestamp = "00:00:01";
+
+		TimeSpan parsedTime;
+		if (TimeSpan.TryParse(timestamp, out parsedTime))
+		{
+			if (Shell.Current is AppShell shell)
+				shell.JumpToTimeStamp(Episode, TimeSpan.Parse(timestamp), Podcast.Title);
+		}
+		else
+		{
+			Debug.WriteLine("Could not jump to timestamp");
+		}
+	});
+
+	public async void Timestamp_Clicked(object sender, EventArgs e)
+	{
+		Debug.WriteLine("Timestamp Clicked");
+		var label = (Label)sender;
+		var timestamp = label.Text;
+		Debug.WriteLine($"Timestamp: {timestamp}");
+
+		if (Shell.Current is AppShell shell)
+		{
+			shell.JumpToTimeStamp(Episode, TimeSpan.Parse(timestamp), Podcast.Title);
+		}
+	}
 }

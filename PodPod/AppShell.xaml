@@ -6,6 +6,7 @@
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:local="clr-namespace:PodPod"
     xmlns:views="clr-namespace:PodPod.Views"
+    xmlns:models="clr-namespace:PodPod.Models"
     Shell.FlyoutBehavior="Locked"
     FlyoutBackgroundColor="#2196F3"
     Title="PodPod">
@@ -26,8 +27,8 @@
               RowDefinitions="20, 50, 0, Auto, 20,Auto,Auto"
               ColumnDefinitions="*,*,*,*">
         
-            <Label x:Name="PodcastDetails"
-                   Text="Select a podcast"
+            <Label 
+                   Text="{Binding playerState.Title, StringFormat='Episode: {0}'}"
                    Grid.Row="0"
                    Grid.ColumnSpan="4"
                    TextColor="White"
@@ -36,8 +37,8 @@
                    VerticalTextAlignment="Center"
                    />
 
-            <Label x:Name="EpisodeDetails"
-                   Text=" "
+            <Label 
+                   Text="{Binding playerState.PodcastTitle, StringFormat='Series: {0}'}"
                    Grid.Row="1"
                    Grid.ColumnSpan="4"
                    TextColor="White"
@@ -47,6 +48,7 @@
                    />
             
             <toolkit:MediaElement
+                Source="{Binding playerState.Source}"
                 x:Name="Player"          
                 Grid.Row="2"
                 Grid.ColumnSpan="4"
@@ -70,8 +72,8 @@
                 Grid.ColumnSpan="4"
                 HorizontalOptions="Center"
                 >
-                <Label x:Name="PositionLabel"
-                        Text="--:--"
+                <Label 
+                        Text="{Binding playerState.Position, StringFormat='{0:hh\\:mm\\:ss}'}"
                         TextColor="White"
                         FontAttributes="Bold"
                         HorizontalTextAlignment="Center"
@@ -81,42 +83,64 @@
                         FontAttributes="Bold"
                         HorizontalTextAlignment="Center"
                         />
-                <Label x:Name="DurationLabel"
-                        Text="--:--"
+                <Label 
+                        Text="{Binding playerState.Duration, StringFormat='{0:hh\\:mm\\:ss}'}"
                         TextColor="White"
                         FontAttributes="Bold"
                         HorizontalTextAlignment="Center"
                         />
             </HorizontalStackLayout>
          
-            <Button x:Name="PlayPause" Text="Play"
+            <Button  
+                    Text="{Binding playerState.PlayButtonText}"
                     Grid.Column="0" Grid.Row="5"
                     Margin="10,20"
                     Clicked="OnPlayPauseClicked"
-                    IsEnabled="False" />
+                    IsEnabled="{Binding playerState.IsPlayEnabled}" />
 
-            <Button x:Name="JumpForward" Text="Jump"
+            <Button Text="Jump"
                     Grid.Column="1" Grid.Row="5"
                     Margin="10,20"
                     Clicked="OnJumpClicked"
-                    IsEnabled="False"/>
+                    IsEnabled="{Binding playerState.IsJumpEnabled}"/>
 
-            <Button x:Name="Stop" Text="Stop"
+            <Button Text="Stop"
                     Grid.Column="2" Grid.Row="5"
                     Margin="10,20"
                     Clicked="OnStopClicked"
-                    IsEnabled="False"/>
+                    IsEnabled="{Binding playerState.IsStopEnabled}"/>
 
-            <Button x:Name="Next" Text="Next"
+            <Button 
+                    Text="Next"
                     Grid.Column="3" Grid.Row="5"
                     Margin="10,20"
                     Clicked="OnNextClicked"
-                    IsEnabled="False"/>
+                    IsEnabled="{Binding playerState.IsNextEnabled}"/>
 
-            <VerticalStackLayout x:Name="PlaylistArea"
-                                 Grid.Row="6"
-                                 Grid.ColumnSpan="4"
-                                  />
+            <CollectionView
+                Grid.Row="6"
+                Grid.ColumnSpan="4"
+                ItemsSource="{Binding playerState.Playlist}"
+                SelectionMode="Single"
+                Margin="20,0,20,20"
+                SelectionChanged="PlaylistItem_Clicked"
+                
+ 
+                >
+
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate >
+                        <Grid>
+                            <Label Text="{Binding Title}" Grid.Column="1" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
         </Grid>
     </Shell.FlyoutHeader>
 

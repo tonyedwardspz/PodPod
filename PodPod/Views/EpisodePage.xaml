@@ -58,7 +58,13 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:TranscriptionItem">
                         <Grid ColumnDefinitions="80,80,*">
-                            <Label Text="{Binding Start, StringFormat='{0:hh\\:mm\\:ss}'}" Grid.Column="0" />
+                            <Label Text="{Binding Start, StringFormat='{0:hh\\:mm\\:ss}'}" Grid.Column="0" >
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer 
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.TimeTappedCommand}"
+                                        CommandParameter="{Binding Start, StringFormat='{0:hh\\:mm\\:ss}'}" />
+                                </Label.GestureRecognizers>
+                            </Label>
                             <Label Text="{Binding End, StringFormat='{0:hh\\:mm\\:ss}'}" Grid.Column="1" />
                             <Label Text="{Binding Text}" Grid.Column="2" />
                         </Grid>

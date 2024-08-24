@@ -13,22 +13,27 @@ namespace PodPod;
 
 public partial class AppShell : Shell
 {
-
-	public Episode CurrentEpisode { get; set; }
-    public ObservableCollection<Episode> CurrentEpisodeList { get; set; } = new ObservableCollection<Episode>();
-    public ObservableCollection<Episode> Playlist { get; set; } = new ObservableCollection<Episode>();
+    private PlayerState _playerState = new PlayerState();
+    public PlayerState playerState {
+        get => _playerState;
+        set {
+            _playerState = value;
+            OnPropertyChanged();
+        }
+    }
 
     internal bool playlistSelection = false;
+
 	public AppShell()
 	{
 		InitializeComponent();
+        BindingContext = this;
 	}
 
 	protected override async void OnNavigating(ShellNavigatingEventArgs args)
     {
         base.OnNavigating(args);
         Debug.WriteLine($"Navigation to {args.Target.Location} started");
-
         Player.PropertyChanged += Player_PropertyChanged;
     }
 
@@ -38,7 +43,7 @@ public partial class AppShell : Shell
         {
             Debug.WriteLine($"Duration: {Player.Duration}" );
             PositionSlider.Maximum = Player.Duration.TotalSeconds;
-            DurationLabel.Text = Player.Duration.ToString(@"hh\:mm\:ss");
+            playerState.Duration = Player.Duration.ToString(@"hh\:mm\:ss");
         }
     }
 
@@ -59,8 +64,8 @@ public partial class AppShell : Shell
 
     void OnPositionChanged(object? sender, MediaPositionChangedEventArgs e)
     {
-        PositionSlider.Value = e.Position.TotalSeconds;
-        PositionLabel.Text = Player.Position.ToString(@"hh\:mm\:ss");
+        playerState.Position = Player.Position;
+        playerState.Duration = Player.Duration.ToString(@"hh\:mm\:ss");
     }
 
     void OnPlayPauseClicked(object sender, EventArgs e)
@@ -68,16 +73,17 @@ public partial class AppShell : Shell
         if (Player.CurrentState == MediaElementState.Playing)
         {
             Player.Pause();
-            PlayPause.Text = "Play";
+            playerState.PlayButtonText = "Play";
         } else
         {
             Player.Play();
-            PlayPause.Text = "Pause";
+            playerState.PlayButtonText = "Pause";
         }
     }
 
     void OnStopClicked(object sender, EventArgs e)
     {
+        playerState.PlayButtonText = "Play";
         Player.Stop();
     }
 
@@ -93,13 +99,14 @@ public partial class AppShell : Shell
 
     void PlayNextPlaylistItem()
     {
-        var index = Playlist.IndexOf(CurrentEpisode);
+        Debug.WriteLine("Next Playlist Item");
+        var index = playerState.Playlist.IndexOf(playerState.CurrentEpisode);
         Debug.WriteLine($"Current Index: {index}");
-        if (index < Playlist.Count - 1)
+        if (index < playerState.Playlist.Count - 1)
         {
-            Episode item = Playlist[index + 1];
-            Playlist.Remove(CurrentEpisode);
-            PlayMedia(item, Playlist.ToList());
+            Episode item = playerState.Playlist[index + 1];
+            playerState.Playlist.Remove(playerState.CurrentEpisode);
+            PlayMedia(item, playerState.Playlist.ToList());
         }
     }
 
@@ -107,105 +114,53 @@ public partial class AppShell : Shell
     {
         Debug.WriteLine("Media opened.");
 
-        PlayPause.IsEnabled = true;
-        Stop.IsEnabled = true;
-        JumpForward.IsEnabled = true;
-        Next.IsEnabled = true;
-        PlayPause.Text = "Pause";
-
-        PositionLabel.Text = Player.Position.ToString(@"hh\:mm\:ss");
-        DurationLabel.Text = Player.Duration.ToString(@"hh\:mm\:ss");
-    }
-    
-    void UpdatePlayList(bool playlistSelection)
-    {
-        ObservableCollection<Episode> tmpEpisodeList = new ObservableCollection<Episode>();
-        if (playlistSelection && Playlist.Count > 0)
-            tmpEpisodeList = new ObservableCollection<Episode>(Playlist);
-        else
-            tmpEpisodeList = new ObservableCollection<Episode>(CurrentEpisodeList);
-
-        Playlist.Clear();
-
-        foreach (var episode in tmpEpisodeList)
-        {
-            if (episode != CurrentEpisode)
-            {
-                Playlist.Add(episode);
-
-                if (Playlist.Count > 10)
-                    break;
-            }
-        }
-        PlaylistArea.Clear();
-
-        var count = 0;
-        foreach(var episode in Playlist)
-        {
-            Label lbl = new Label();
-            lbl.Text = episode.Title;
-            lbl.TextColor = Color.FromArgb("#000000");
-            lbl.Margin = new Thickness(0, 0, 0, 10);
-            lbl.MinimumHeightRequest = 37;
-            lbl.VerticalTextAlignment = TextAlignment.Center;
-
-            lbl.GestureRecognizers.Add(new TapGestureRecognizer
-            {
-                Command = new Command(() => OnPlaylistItemClicked(lbl))
-            });
-
-            if (episode == CurrentEpisode)
-                lbl.FontAttributes = FontAttributes.Bold; 
-            
-            lbl.BackgroundColor = Playlist.IndexOf(episode) % 2 == 0 ? Color.FromArgb("#F0F0F0") : Color.FromArgb("#D0D0D0");
-
-            PlaylistArea.Add(lbl);
-
-            if (count == 5)
-            {
-                break;
-            }
-            count++;
-        }
-        Debug.WriteLine($"Playlist length: {Playlist.Count}");
+        playerState.IsPlayEnabled = true;
+        playerState.IsStopEnabled = true;
+        playerState.IsJumpEnabled = true;
+        playerState.IsNextEnabled = true;
+        playerState.PlayButtonText = "Pause";
+        playerState.Duration = Player.Duration.ToString(@"hh\:mm\:ss");
+        playerState.Duration = Player.Position.ToString(@"hh\:mm\:ss");
     }
 
-    public async void PlayMedia(Episode episode, List<Episode> Episodes, string PodcastTitle = "")
+    public async void PlayMedia(Episode episode, List<Episode> Episodes, string PodcastTitle = "", TimeSpan timestamp = new TimeSpan())
     {
-        await MainThread.InvokeOnMainThreadAsync(() =>
-        {
-            CurrentEpisodeList = Episodes.ToObservableCollection();
-            CurrentEpisode = episode;
-            Player.Source = episode?.MediaURL;
-            Player.Play();
-            EpisodeDetails.Text = $"Episode: {episode?.Title}";
+        Debug.WriteLine("Play Media");
 
-            if (PodcastTitle != "")
-            {
-                PodcastDetails.Text = $"Series: {PodcastTitle}";
-                UpdatePlayList(true);
-            } else
-            {
-                UpdatePlayList(false);
-            }
-        });
+        if (playerState.Source != episode?.MediaURL)
+        {
+            playerState.Source = episode?.MediaURL;
+            playerState.CurrentEpisode = episode;
+            playerState.Title = episode?.Title;
+            playerState.PodcastTitle = PodcastTitle;
+            playerState.CurrentEpisode = episode;
+            playerState.Playlist = Episodes.ToObservableCollection();
+            PositionSlider.Value = 0;
+        }
+
+        if (timestamp != new TimeSpan()){
+            await Task.Delay(150);
+            await Player.SeekTo(timestamp, CancellationToken.None);
+        }
     }
 
     void OnMediaEnded(object? sender, EventArgs e)
     {
         Debug.WriteLine("Media ended.");
-        CurrentEpisode.Played = true;
+        playerState.CurrentEpisode.Played = true;
         Data.SaveToJsonFile(Data.Podcasts, "podcasts");
         PlayNextPlaylistItem();
     }
     
-    private void OnPlaylistItemClicked(object sender)
+    private void PlaylistItem_Clicked(object sender, SelectionChangedEventArgs e)
     {
-        var lbl = (Label)sender;
-        var episode = Playlist.Where(episode => episode.Title == lbl.Text).FirstOrDefault();
+        Debug.WriteLine("Playlist Item Clicked");
+
+        var episode = e.CurrentSelection.FirstOrDefault() as Episode;
         Debug.WriteLine($"Episode Selected from playlist: {episode?.Title}");
-        if (episode != null)
-            PlayMedia(episode, Playlist.ToList());
+        if (episode != null){
+            PlayMedia(episode, playerState.Playlist.ToList());
+        }
     }
 
     public async void ImportOPML_Clicked(object sender, EventArgs e)
@@ -228,4 +183,12 @@ public partial class AppShell : Shell
         }
         Console.WriteLine("Podcasts loaded from import: " + Data.Podcasts.Count);
     }
+
+    public async void JumpToTimeStamp(Episode ep, TimeSpan timestamp, string podcastTitle)
+    {
+        Debug.WriteLine($"Jumping to timestamp {timestamp}");
+        PlayMedia(ep, playerState.Playlist.ToList(), podcastTitle, timestamp);        
+    }
 }
+
+
