@@ -1,12 +1,13 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.Json;
+using CommunityToolkit.Maui.Core.Extensions;
 using PodPod.Models;
 
 namespace PodPod.Services;
 
 public class Data
 {
-    private static readonly string _dataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "PodPod", "Data");
     public static List<Podcast> podcasts { get; set; }
     public static List<Podcast> Podcasts {
          get => podcasts;
@@ -16,6 +17,8 @@ public class Data
          }
     }
 
+    public static ObservableCollection<Podcast> PodcastsObservable = new ObservableCollection<Podcast>();
+
     private Data(){}
 
     public static void init(){
@@ -23,6 +26,7 @@ public class Data
         {
             Debug.WriteLine("Loading podcasts from file at init");
             Podcasts = LoadFromJsonFile<List<Podcast>>("podcasts");
+            PodcastsObservable = Podcasts.ToObservableCollection();
         } else {
             Podcasts = new List<Podcast>();
         }

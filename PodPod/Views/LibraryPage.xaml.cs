@@ -25,7 +25,7 @@ public partial class LibraryPage : ContentPage
 	{
 		InitializeComponent();
 		BindingContext = this;
-		Podcasts = Data.Podcasts.ToObservableCollection() ?? new ObservableCollection<Podcast>();
+		Podcasts = Data.Podcasts.ToObservableCollection();
 	}
 
 	protected override void OnNavigatedTo(NavigatedToEventArgs e)
@@ -40,12 +40,12 @@ public partial class LibraryPage : ContentPage
 		}
 	}
 
-	public async void PrepPodcasts(){
+	public async void PrepPodcasts()
+	{
 		Opml opml = await FeedsService.ProcessOPMLFile();
-		List<Podcast> pods = await FeedsService.CreatePodcastList(opml);
-		Podcasts = pods.ToObservableCollection();
+		Data.Podcasts = await FeedsService.CreatePodcastList(opml);
+		Podcasts = Data.Podcasts.ToObservableCollection(); // TODO: This is still poor form. Refactor to obervable collection?
 		Console.WriteLine("Podcasts loaded: " + Podcasts.Count);
-		Data.Podcasts = pods;
 	}
 
 	public async void Podcast_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -65,4 +65,6 @@ public partial class LibraryPage : ContentPage
 			Debug.WriteLine(err.Message);
 		}
 	}
+
+	public void ScrollToTop() => PodcastCollection.ScrollTo(0);
 }

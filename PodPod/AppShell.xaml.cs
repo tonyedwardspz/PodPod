@@ -4,8 +4,10 @@ using System.Diagnostics;
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Maui.Core.Primitives;
 using CommunityToolkit.Maui.Views;
+using OPMLCore.NET;
 using PodPod.Models;
 using PodPod.Services;
+using PodPod.Views;
 
 namespace PodPod;
 
@@ -204,5 +206,26 @@ public partial class AppShell : Shell
         Debug.WriteLine($"Episode Selected from playlist: {episode?.Title}");
         if (episode != null)
             PlayMedia(episode, Playlist.ToList());
+    }
+
+    public async void ImportOPML_Clicked(object sender, EventArgs e)
+    {
+        Debug.WriteLine("Import OPML Clicked");
+
+        Opml opml = await FeedsService.DownloadAndProcessOPMLFile();
+        Data.Podcasts = await FeedsService.CreatePodcastList(opml);
+
+        var currentPage = Shell.Current.CurrentPage;
+        if (currentPage is LibraryPage)
+        {
+            LibraryPage page = (LibraryPage)currentPage;
+            page.Podcasts = Data.Podcasts.ToObservableCollection();
+            page.ScrollToTop();
+        }
+        else
+        {
+            await Shell.Current.GoToAsync($"{nameof(LibraryPage)}");
+        }
+        Console.WriteLine("Podcasts loaded from import: " + Data.Podcasts.Count);
     }
 }

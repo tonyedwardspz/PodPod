@@ -8,6 +8,7 @@
     <ScrollView>
         
         <CollectionView 
+            x:Name="PodcastCollection"
             ItemsSource="{Binding Podcasts}"
             SelectionMode="Single"
             SelectionChanged="Podcast_SelectionChanged" 

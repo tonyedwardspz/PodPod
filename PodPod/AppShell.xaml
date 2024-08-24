@@ -10,6 +10,16 @@
     FlyoutBackgroundColor="#2196F3"
     Title="PodPod">
 
+    <Shell.MenuBarItems>
+        <MenuBarItem Text="File">
+            <MenuFlyoutItem Clicked="ImportOPML_Clicked" Text="Import OPML File">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="O" Modifiers="Cmd" />
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+        </MenuBarItem>
+    </Shell.MenuBarItems>
+
     <Shell.FlyoutHeader >
         <Grid BackgroundColor="Black"
               MinimumHeightRequest="490"

@@ -7,23 +7,43 @@ namespace PodPod.Services;
 
 public static class FeedsService
 {
-    public async static Task<Opml> ProcessOPMLFile()
-    {
-        Console.WriteLine("Processing OPML");
+	public static async Task<Opml> DownloadAndProcessOPMLFile()
+	{
+		Debug.WriteLine("Getting OPML File");
+        string destPath = Path.Combine(AppPaths.DataDirectory, "my-podcast-list.opml");
 
-        var fileName = "podcastlist.opml";
-        string destPath = Path.Combine(FileSystem.AppDataDirectory, fileName);
+		if (File.Exists(destPath))
+			File.Delete(destPath);
 
-        using (var stream = await FileSystem.OpenAppPackageFileAsync(fileName))
+		var file = await FilePicker.PickAsync(new PickOptions
         {
-            using (var destStream = File.Create(destPath))
-            {
-                await stream.CopyToAsync(destStream);
-            }
-        }
+            PickerTitle = "Select OPML file"
+        });
 
-        Opml opml = new Opml(destPath);
-        return opml;
+        if (file != null)
+        {	
+			try {
+				var stream = await file.OpenReadAsync();
+				using (var destStream = File.Create(destPath))
+				{
+					await stream.CopyToAsync(destStream);
+				}
+			} catch (Exception ex){
+				Debug.WriteLine($"Error saving OPML file: {ex.Message}");
+			}
+		}
+		return await ProcessOPMLFile(destPath);
+	}
+
+    public async static Task<Opml> ProcessOPMLFile(string destpath = "podcastlist.opml")
+    {
+        Console.WriteLine("Processing OPML File");
+
+		if (destpath == "podcastlist.opml"){
+			Debug.WriteLine("Using default OPML file");
+			destpath = Path.Combine(FileSystem.AppDataDirectory, destpath);
+		}
+        return new Opml(destpath);
     }
 
     public async static Task<List<Podcast>> CreatePodcastList(Opml opml)
@@ -31,14 +51,27 @@ public static class FeedsService
         Console.WriteLine("Creating Podcast List");
         List<Podcast> podcasts = new List<Podcast>();
 
-        foreach (Outline outline in opml.Body.Outlines)
-        {
-            foreach (Outline childOutline in outline.Outlines)
+		try
+		{
+            foreach (Outline outline in opml.Body.Outlines)
             {
-                var podcast = new Podcast(childOutline.Text, childOutline.XMLUrl);
-                podcasts.Add(podcast);
+				if (outline.Text.ToLower() == "feeds"){
+					foreach (Outline childOutline in outline.Outlines)
+					{
+						var podcast = new Podcast(childOutline.Text, childOutline.XMLUrl);
+						podcasts.Add(podcast);
+					}
+				} else {
+					var podcast = new Podcast(outline.Text, outline.XMLUrl);
+					podcasts.Add(podcast);
+				}
             }
         }
+		catch (Exception e)
+		{
+			Debug.WriteLine("Error processing OPML file: " +e.Message);
+		}
+        
         return podcasts;
     }
 
@@ -76,7 +109,6 @@ FetchFeed(Podcast pod){
                 return;
             }
         }
-				
 
 		await Task.Run(() =>
 		{
