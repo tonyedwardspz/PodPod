@@ -54,6 +54,7 @@
                 Grid.ColumnSpan="4"
                 MediaOpened="OnMediaOpened"
                 MediaEnded="OnMediaEnded"
+                MediaFailed="OnMediaFailed"
                 ShouldShowPlaybackControls="False"
                 PositionChanged="OnPositionChanged"
                 ShouldAutoPlay="True"
@@ -117,15 +118,13 @@
                     Clicked="OnNextClicked"
                     IsEnabled="{Binding playerState.IsNextEnabled}"/>
 
-            <CollectionView
+            <!--<CollectionView
                 Grid.Row="6"
                 Grid.ColumnSpan="4"
                 ItemsSource="{Binding playerState.Playlist}"
                 SelectionMode="Single"
                 Margin="20,0,20,20"
                 SelectionChanged="PlaylistItem_Clicked"
-                
- 
                 >
 
                 <CollectionView.ItemsLayout>
@@ -140,7 +139,7 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
 
-            </CollectionView>
+            </CollectionView>-->
         </Grid>
     </Shell.FlyoutHeader>
 
@@ -156,11 +155,8 @@
         </DataTemplate>
     </Shell.ItemTemplate>
 
-    <FlyoutItem Title="Podcast Library">
-        <Tab>
-            <ShellContent ContentTemplate="{DataTemplate views:LibraryPage}" Title="Podcast Library"/>
-        </Tab>
-    </FlyoutItem>
+    <ShellContent Title="Podcast Library"
+                  ContentTemplate="{DataTemplate views:LibraryPage}" />
 
 </Shell>
 

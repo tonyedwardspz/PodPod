@@ -97,6 +97,13 @@ public partial class AppShell : Shell
         PlayNextPlaylistItem();
     }
 
+    void OnMediaFailed(object? sender, MediaFailedEventArgs e)
+    {
+        Debug.WriteLine(e.ErrorMessage);
+        Debug.WriteLine("Media failed.");
+
+    }
+
     void PlayNextPlaylistItem()
     {
         Debug.WriteLine("Next Playlist Item");
@@ -106,7 +113,7 @@ public partial class AppShell : Shell
         {
             Episode item = playerState.Playlist[index + 1];
             playerState.Playlist.Remove(playerState.CurrentEpisode);
-            PlayMedia(item, playerState.Playlist.ToList());
+            PlayMedia(item, playerState.Playlist);
         }
     }
 
@@ -123,22 +130,41 @@ public partial class AppShell : Shell
         playerState.Duration = Player.Position.ToString(@"hh\:mm\:ss");
     }
 
-    public async void PlayMedia(Episode episode, List<Episode> Episodes, string PodcastTitle = "", TimeSpan timestamp = new TimeSpan())
+    public async Task PlayMedia(Episode episode, ObservableCollection<Episode> Episodes, string PodcastTitle = "", TimeSpan timestamp = new TimeSpan())
     {
         Debug.WriteLine("Play Media");
+        if (episode == null) return;
+        if (episode.MediaURL == null) return;
 
-        if (playerState.Source != episode?.MediaURL)
+        string mediaUrl = episode.MediaURL;
+        if (string.IsNullOrEmpty(mediaUrl)) return;
+       
+
+        MediaSource source;
+
+        if (Uri.IsWellFormedUriString(mediaUrl, UriKind.Absolute) && 
+            (mediaUrl.StartsWith("http://") || mediaUrl.StartsWith("https://")))
         {
-            playerState.Source = episode?.MediaURL;
+            source = MediaSource.FromUri(new Uri(mediaUrl));
+        }
+        else
+        {
+            source = MediaSource.FromFile(mediaUrl);
+        }
+        if (source == null) return;
+
+        if (playerState.Source != source)
+        {
+            playerState.Source = source;
             playerState.CurrentEpisode = episode;
-            playerState.Title = episode?.Title;
+            playerState.Title = episode.Title;
             playerState.PodcastTitle = PodcastTitle;
             playerState.CurrentEpisode = episode;
-            playerState.Playlist = Episodes.ToObservableCollection();
-            PositionSlider.Value = 0;
+            playerState.Playlist = Episodes;
+            MainThread.BeginInvokeOnMainThread(() => PositionSlider.Value = 0);
         }
 
-        if (timestamp != new TimeSpan()){
+        if (timestamp != TimeSpan.Zero){
             await Task.Delay(150);
             await Player.SeekTo(timestamp, CancellationToken.None);
         }
@@ -159,7 +185,7 @@ public partial class AppShell : Shell
         var episode = e.CurrentSelection.FirstOrDefault() as Episode;
         Debug.WriteLine($"Episode Selected from playlist: {episode?.Title}");
         if (episode != null){
-            PlayMedia(episode, playerState.Playlist.ToList());
+            PlayMedia(episode, playerState.Playlist);
         }
     }
 
@@ -187,7 +213,7 @@ public partial class AppShell : Shell
     public async void JumpToTimeStamp(Episode ep, TimeSpan timestamp, string podcastTitle)
     {
         Debug.WriteLine($"Jumping to timestamp {timestamp}");
-        PlayMedia(ep, playerState.Playlist.ToList(), podcastTitle, timestamp);        
+        PlayMedia(ep, playerState.Playlist, podcastTitle, timestamp);        
     }
 }
 

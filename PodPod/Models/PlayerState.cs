@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using CommunityToolkit.Maui.Views;
 
 namespace PodPod.Models;
 
 public class PlayerState : Base
 {
-    private string _source;
-    public string Source
+    private MediaSource _source;
+    public MediaSource Source
     {
         get => _source;
         set

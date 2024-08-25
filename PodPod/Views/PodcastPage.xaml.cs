@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using PodPod.Models;
 using PodPod.Services;
 
@@ -111,8 +112,9 @@ public partial class PodcastPage : ContentPage
             {
 				if (Shell.Current is AppShell shell)
 				{
-					var nextEpisodes = Podcast.Episodes.SkipWhile(e => e.Id != episode.Id).Skip(1).Take(10).ToList();
-					shell.PlayMedia(episode, nextEpisodes, Podcast.Title);
+					var nextEpisodes = Podcast.Episodes.SkipWhile(e => e.Id != episode.Id).Skip(1).Take(10);
+					ObservableCollection<Episode> eps = new ObservableCollection<Episode>(nextEpisodes);
+					shell.PlayMedia(episode, eps, Podcast.Title);
 				}
             }
         }
@@ -128,7 +130,8 @@ public partial class PodcastPage : ContentPage
 			if (Shell.Current is AppShell shell)
 			{
 				var nextEpisodes = Podcast.Episodes.SkipWhile(e => e.Id != episode.Id).Skip(1).Take(10).ToList();
-				shell.PlayMedia(episode, nextEpisodes, Podcast.Title);
+				ObservableCollection<Episode> eps = new ObservableCollection<Episode>(nextEpisodes);
+					shell.PlayMedia(episode, eps, Podcast.Title);
 			}
 		}
 	}
