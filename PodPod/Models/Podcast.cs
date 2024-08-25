@@ -45,6 +45,15 @@ public class Podcast : Base
 			OnPropertyChanged();
 		}
 	}
+	private VerticalStackLayout? descriptionStack;
+	public VerticalStackLayout? DescriptionStack { 
+		get => descriptionStack;
+		set {
+			descriptionStack = value;
+			OnPropertyChanged();
+		}
+	}
+
 	private string? cover;
 	public string? Cover { 
 		get => cover ?? "cover.png";

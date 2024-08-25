@@ -50,9 +50,20 @@ public partial class PodcastPage : ContentPage
 			await FeedsService.FetchFeed(Podcast);
 		});
 
-		VerticalStackLayout stackLayout = HTMLHelper.ProcessHTML(Podcast.Description);
-        DescriptionContainer.Children.Add(stackLayout);
-
+		// Prevents duplicate descriptions when navigating back to the page. 
+		if (DescriptionContainer.Children.Count == 0)
+		{
+			if (Podcast.DescriptionStack != null && Podcast.DescriptionStack.Children.Count > 0)
+			{
+				DescriptionContainer.Children.Add(Podcast.DescriptionStack);
+			}
+			else
+			{
+				VerticalStackLayout stackLayout = HTMLHelper.ProcessHTML(Podcast.Description);
+				Podcast.DescriptionStack = stackLayout;
+				DescriptionContainer.Children.Add(stackLayout);
+			}
+		}
 		Debug.WriteLine($"Podcast page: {Podcast.EpisodeCount} episodes of {Podcast.Title} loaded.");
     }
 
