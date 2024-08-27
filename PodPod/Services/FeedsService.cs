@@ -7,6 +7,27 @@ namespace PodPod.Services;
 
 public static class FeedsService
 {
+	public static async Task DownloadAllFeeds(){
+		Debug.WriteLine("Downloading all feeds");
+		try
+		{
+			foreach (Podcast pod in Data.Podcasts)
+			{
+				Debug.WriteLine($"Checking {pod.Title}");
+				await FetchFeed(pod);
+				Console.WriteLine("Check completed for " + pod.Title);
+
+			}
+			await Task.Delay(2000);
+			await Data.SaveToJsonFile(Data.Podcasts, "podcasts");
+		}
+		catch (Exception ex)
+		{
+			Debug.WriteLine($"An error occurred: {ex.Message}");
+		}
+		return;
+	}
+
 	public static async Task<Opml> DownloadAndProcessOPMLFile()
 	{
 		Debug.WriteLine("Getting OPML File");
@@ -89,27 +110,38 @@ public static class FeedsService
         }
     }
 
-    public static async 
-    Task
-FetchFeed(Podcast pod){
+    public static async Task FetchFeed(Podcast pod){
 		Rss20Feed feed = new Rss20Feed();
 
 		await Task.Run(() =>
 		{
 			Debug.WriteLine("Fetching feed");
-			var factory = new HttpFeedFactory();
-			feed = factory.CreateFeed(new Uri(pod.FeedUrl)) as Rss20Feed;
-			Debug.WriteLine("Feed fetched");
+			try
+			{
+				var factory = new HttpFeedFactory();
+				feed = factory.CreateFeed(new Uri(pod.FeedUrl)) as Rss20Feed;
+				Debug.WriteLine("Feed fetched");
+			}catch (Exception e)
+			{
+				Debug.WriteLine("Error with: " + pod.FeedUrl);
+				Debug.WriteLine("Error fectching feed: " + e.Message);
+			}
 		});
 
-		if (pod.LastChecked != null){
+		if (pod.LastChecked != null)
+		{
 			if (pod.LastChecked > feed.LastUpdated)
 			{
-				pod.LastChecked = DateTime.Now;
-                return;
-            }
+				
+				return;
+			}
+            pod.LastChecked = DateTime.Now;
         }
+		try {
 
+		
+
+		Debug.WriteLine("Processing podcast data for " + pod.Title);
 		await Task.Run(() =>
 		{
 			Debug.WriteLine("Processing podcast data");
@@ -123,35 +155,47 @@ FetchFeed(Podcast pod){
 			Debug.WriteLine("Building Episode list");
 			foreach (var item in feed.Items)
 			{
-				eps.Add(new Episode
+				try
 				{
-					Id = item.Id,
-					Title = item.Title,
-					MediaURL = item.MediaUrl,
-					Description = item.Content,
-					Published = item.DatePublished,
-					Cover = item.Cover,
-					Author = item.Author,
-					Link = item.Link,
-					EpisodeNumber = item.EpisodeNumber,
-					Duration = item.MediaLength
-				});
+					eps.Add(new Episode
+					{
+						Id = item.Id,
+						Title = item.Title,
+						MediaURL = item.MediaUrl,
+						Description = item.Content,
+						Published = item.DatePublished,
+						Cover = item.Cover,
+						Author = item.Author,
+						Link = item.Link,
+						EpisodeNumber = item.EpisodeNumber,
+						Duration = item.MediaLength
+					});
+				}catch(Exception e)
+				{
+
+					Debug.WriteLine("Error with: " + item.Title);
+					Debug.WriteLine("Error creating ep:" + e.Message);
+				}
 			}
 			pod.Episodes = eps;
 			Debug.WriteLine("Episode list built");
 
-			_ = Task.Run(async () =>{
-				var result = await DownloadService.DownloadImageAsync(pod.Cover, AppPaths.SeriesDirectory(pod.FolderName));
-				if (result != null)
-				{
-					pod.Cover = result;
-				}
-			});
+			//_ = Task.Run(async () =>{
+			//	var result = await DownloadService.DownloadImageAsync(pod.Cover, AppPaths.SeriesDirectory(pod.FolderName));
+			//	if (result != null)
+			//	{
+			//		pod.Cover = result;
+			//	}
+			//});
 
-			var index = Data.Podcasts.FindIndex(p => p.Title.ToLower() == pod.Title.ToLower());
-			Data.Podcasts[index] = pod;
-			Data.SaveToJsonFile(Data.Podcasts, "podcasts");
+			//var index = Data.Podcasts.FindIndex(p => p.Title.ToLower() == pod.Title.ToLower());
+			//Data.Podcasts[index] = pod;
+			//Data.SaveToJsonFile(Data.Podcasts, "podcasts");
 		});
+		} catch (Exception e){
+			Debug.WriteLine("Error processing podcast data: " + e.Message);
+		}
+		return;
 	}
 }
 

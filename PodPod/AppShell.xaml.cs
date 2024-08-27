@@ -28,13 +28,20 @@ public partial class AppShell : Shell
 	{
 		InitializeComponent();
         BindingContext = this;
+        Player.PropertyChanged += Player_PropertyChanged;
 	}
 
 	protected override async void OnNavigating(ShellNavigatingEventArgs args)
     {
-        base.OnNavigating(args);
+        
         Debug.WriteLine($"Navigation to {args.Target.Location} started");
-        Player.PropertyChanged += Player_PropertyChanged;
+
+        // if the route starts with //LibraryPage, navigate to the library page
+        // if (args.Target.Location.ToString().StartsWith("//LibraryPage"))
+        // {
+        //     await Shell.Current.GoToAsync($"//");
+        // }
+        base.OnNavigating(args);
     }
 
 	void Player_PropertyChanged(object? sender, PropertyChangedEventArgs e)

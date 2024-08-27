@@ -51,13 +51,11 @@ public static class DownloadService
             try
             {
                 byte[] imageData = await httpClient.GetByteArrayAsync(imageUrl);
-
-                // Get file extension and file name
                 string fileExtension = Path.GetExtension(imageUrl);
-                string fileName = "Cover" + fileExtension;
+                string fileName = Guid.NewGuid().ToString() + "Cover" + fileExtension;
 
-                // Save the cover in the temporary folder
-                string tempFilePath = Path.Combine(AppPaths.TempDirectory, "cover" + fileExtension);
+                // Save the cover in the temporary folder, using a unique name
+                string tempFilePath = Path.Combine(AppPaths.TempDirectory, Guid.NewGuid().ToString() + "-cover" + fileExtension);
                 if (File.Exists(tempFilePath))
                     File.Delete(tempFilePath);
                 await File.WriteAllBytesAsync(tempFilePath, imageData);
@@ -76,7 +74,7 @@ public static class DownloadService
                 // Delete the temporary file if needed
                 if (File.Exists(tempFilePath))
                     File.Delete(tempFilePath);
-
+                Debug.WriteLine("Image Downloaded");
                 return newFilePath;
             }
             catch (Exception e)

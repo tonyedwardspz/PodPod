@@ -77,7 +77,7 @@ public static class TranscriptionService
         Console.WriteLine("Converting MP3 to WAV");
 
         try {
-            var outputFilePath = Path.Combine(AppPaths.TempDirectory, fileName + ".wav");
+            var outputFilePath = Path.Combine(AppPaths.TempDirectory, fileName + Guid.NewGuid().ToString() + ".wav");
 
             if (File.Exists(outputFilePath))
             {

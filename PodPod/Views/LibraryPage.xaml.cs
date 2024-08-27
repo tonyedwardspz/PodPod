@@ -38,6 +38,8 @@ public partial class LibraryPage : ContentPage
 			Debug.WriteLine("No podcasts found, loading from OPML");
 			PrepPodcasts();
 		}
+
+		FeedsService.DownloadAllFeeds();
 	}
 
 	public async void PrepPodcasts()

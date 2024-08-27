@@ -11,7 +11,7 @@ public partial class App : Application
 
 		Data.init();
 
-		Routing.RegisterRoute(nameof(LibraryPage), typeof(LibraryPage));
+		// Routing.RegisterRoute(nameof(LibraryPage), typeof(LibraryPage));
 		Routing.RegisterRoute(nameof(PodcastPage), typeof(PodcastPage));
 		Routing.RegisterRoute(nameof(EpisodePage), typeof(EpisodePage));
 

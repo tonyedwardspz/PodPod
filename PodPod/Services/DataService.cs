@@ -41,7 +41,7 @@ public class Data
     }
 
     private static bool FirstLoad = true;
-    public static async void SaveToJsonFile<T>(T data, string fileName)
+    public static async Task SaveToJsonFile<T>(T data, string fileName)
     {
         if(FirstLoad){
             FirstLoad = false;
@@ -60,6 +60,7 @@ public class Data
             Debug.WriteLine(e.Message);
             Debug.WriteLine("Failed to save to file");
         }
+        return;
     }
 
     public static T LoadFromJsonFile<T>(string fileName)

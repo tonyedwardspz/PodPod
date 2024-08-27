@@ -16,7 +16,7 @@ public class Podcast : Base
 	public string FeedUrl { 
 		get => feedUrl;
 		set {
-			feedUrl = FileHelper.RemoveQueryParams(value);
+			feedUrl = value;
 			OnPropertyChanged();
 		}
 	}
