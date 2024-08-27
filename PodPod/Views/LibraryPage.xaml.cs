@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using CommunityToolkit.Maui.Core.Extensions;
-using OPMLCore.NET;
+using Podly.FeedParser;
 using PodPod.Models;
 using PodPod.Services;
 

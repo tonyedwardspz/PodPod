@@ -4,7 +4,7 @@ using System.Diagnostics;
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Maui.Core.Primitives;
 using CommunityToolkit.Maui.Views;
-using OPMLCore.NET;
+using Podly.FeedParser;
 using PodPod.Models;
 using PodPod.Services;
 using PodPod.Views;
