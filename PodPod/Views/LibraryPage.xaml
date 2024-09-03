@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PodPod.Views.LibraryPage"
              xmlns:models="clr-namespace:PodPod.Models"
-             Title="LibraryPage">
+             Title="My Library"
+             Shell.TabBarIsVisible="False">
 
     <ScrollView>
         

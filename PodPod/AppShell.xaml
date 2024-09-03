@@ -154,11 +154,16 @@
             </Grid>
         </DataTemplate>
     </Shell.ItemTemplate>
-    <FlyoutItem 
-                FlyoutDisplayOptions="AsMultipleItems">
+
+    <FlyoutItem FlyoutDisplayOptions="AsMultipleItems" >
+
         <ShellContent Title="Podcast Library"
                     ContentTemplate="{DataTemplate views:LibraryPage}"
                     Route="LibraryPage"
+                     />
+        <ShellContent Title="Latest Feed"
+                    ContentTemplate="{DataTemplate views:LatestPage}"
+                    Route="LatestPage"
                      />
     </FlyoutItem>
 
