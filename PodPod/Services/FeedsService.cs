@@ -189,15 +189,15 @@ public static class FeedsService
 				}
 			}
 			pod.Episodes = eps;
-			Debug.WriteLine("Episode list built");
+			Debug.WriteLine("Episode list built for " + pod.Title);
 
-			//_ = Task.Run(async () =>{
-			//	var result = await DownloadService.DownloadImageAsync(pod.Cover, AppPaths.SeriesDirectory(pod.FolderName));
-			//	if (result != null)
-			//	{
-			//		pod.Cover = result;
-			//	}
-			//});
+			_ = Task.Run(async () =>{
+				var result = await DownloadService.DownloadImageAsync(pod.Cover, AppPaths.SeriesDirectory(pod.FolderName));
+				if (result != null)
+				{
+					pod.Cover = result;
+				}
+			});
 
 			//var index = Data.Podcasts.FindIndex(p => p.Title.ToLower() == pod.Title.ToLower());
 			//Data.Podcasts[index] = pod;

@@ -50,9 +50,26 @@ public static class DownloadService
             Debug.WriteLine("Downloading image: " + imageUrl);
             try
             {
-                byte[] imageData = await httpClient.GetByteArrayAsync(imageUrl);
+                var request = new HttpRequestMessage(HttpMethod.Get, imageUrl);
+                var response = await httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                byte[] imageData = await response.Content.ReadAsByteArrayAsync();
+
+                // Not all image urls have an image extension, so we may need to determine the file extension from the content type
+                string contentType = response.Content.Headers.ContentType.MediaType;
                 string fileExtension = Path.GetExtension(imageUrl);
-                string fileName = Guid.NewGuid().ToString() + "Cover" + fileExtension;
+                if (string.IsNullOrEmpty(fileExtension))
+                {
+                    fileExtension = contentType switch
+                    {
+                        "image/jpeg" => ".jpg",
+                        "image/png" => ".png",
+                        "image/gif" => ".gif",
+                        _ => ".jpg"
+                    };
+                }
+                string fileName = "cover" + fileExtension;
 
                 // Save the cover in the temporary folder, using a unique name
                 string tempFilePath = Path.Combine(AppPaths.TempDirectory, Guid.NewGuid().ToString() + "-cover" + fileExtension);
@@ -60,7 +77,7 @@ public static class DownloadService
                     File.Delete(tempFilePath);
                 await File.WriteAllBytesAsync(tempFilePath, imageData);
 
-                // Resize the image to 1000xN
+                // Resize the image to 1500xN
                 string newFilePath = Path.Combine(filePath, fileName);
                 await FFMpegArguments
                     .FromFileInput(tempFilePath)
@@ -71,10 +88,9 @@ public static class DownloadService
                     ))
                     .ProcessAsynchronously(true, new FFOptions { BinaryFolder = "/opt/homebrew/bin" });
 
-                // Delete the temporary file if needed
                 if (File.Exists(tempFilePath))
                     File.Delete(tempFilePath);
-                Debug.WriteLine("Image Downloaded");
+
                 return newFilePath;
             }
             catch (Exception e)
@@ -83,7 +99,6 @@ public static class DownloadService
                 Debug.WriteLine(e.Message);
                 return imageUrl;
             }
-
         }
     }
 }

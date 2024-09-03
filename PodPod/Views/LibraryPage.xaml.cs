@@ -28,7 +28,7 @@ public partial class LibraryPage : ContentPage
 		Podcasts = Data.Podcasts.ToObservableCollection();
 	}
 
-	protected override void OnNavigatedTo(NavigatedToEventArgs e)
+	protected override async void OnNavigatedTo(NavigatedToEventArgs e)
     {
 		Debug.WriteLine("Navigated to Library Page");
         base.OnNavigatedTo(e);
@@ -36,18 +36,18 @@ public partial class LibraryPage : ContentPage
 		if (Podcasts.Count == 0)
 		{
 			Debug.WriteLine("No podcasts found, loading from OPML");
-			PrepPodcasts();
+			await PrepPodcasts();
 		}
-
 		FeedsService.DownloadAllFeeds();
 	}
 
-	public async void PrepPodcasts()
+	public async Task PrepPodcasts()
 	{
 		Opml opml = await FeedsService.ProcessOPMLFile();
 		Data.Podcasts = await FeedsService.CreatePodcastList(opml);
 		Podcasts = Data.Podcasts.ToObservableCollection(); // TODO: This is still poor form. Refactor to obervable collection?
 		Console.WriteLine("Podcasts loaded: " + Podcasts.Count);
+		return;
 	}
 
 	public async void Podcast_SelectionChanged(object sender, SelectionChangedEventArgs e)
