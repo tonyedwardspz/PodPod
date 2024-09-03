@@ -19,8 +19,8 @@ public static class TranscriptionService
         try
         {
             var modelFileName = "ggml-base.en.bin";
-            string modelPath = Path.Combine(FileSystem.AppDataDirectory, "Raw/model", modelFileName);
-            string destPath = Path.Combine(FileSystem.AppDataDirectory, modelFileName);
+            string modelPath = Path.Combine(AppPaths.DataDirectory, "Raw/model", modelFileName);
+            string destPath = Path.Combine(AppPaths.DataDirectory, modelFileName);
 
             if (!File.Exists(destPath))
             {
