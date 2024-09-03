@@ -61,7 +61,19 @@ public static class FeedsService
 
 		if (destpath == "podcastlist.opml"){
 			Debug.WriteLine("Using default OPML file");
-			destpath = Path.Combine(FileSystem.AppDataDirectory, destpath);
+            destpath = Path.Combine(AppPaths.DataDirectory, destpath);
+
+            if (!File.Exists(destpath))
+            {
+                Console.WriteLine("Moving model to the right place");
+                using (var stream = await FileSystem.OpenAppPackageFileAsync("podcastlist.opml"))
+                {
+                    using (var destStream = File.Create(destpath))
+                    {
+                        await stream.CopyToAsync(destStream);
+                    }
+                }
+            }
 		}
         return new Opml(destpath);
     }
