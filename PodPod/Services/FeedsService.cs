@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Podly.FeedParser;
 using PodPod.Models;
 namespace PodPod.Services;
@@ -143,11 +142,12 @@ public static class FeedsService
 		{
 			if (pod.LastChecked > feed.LastUpdated)
 			{
-				
+				pod.LastChecked = DateTime.Now;
 				return;
 			}
-            pod.LastChecked = DateTime.Now;
         }
+		pod.LastChecked = DateTime.Now;
+		
 		try {
 
 		
@@ -198,10 +198,6 @@ public static class FeedsService
 					pod.Cover = result;
 				}
 			});
-
-			//var index = Data.Podcasts.FindIndex(p => p.Title.ToLower() == pod.Title.ToLower());
-			//Data.Podcasts[index] = pod;
-			//Data.SaveToJsonFile(Data.Podcasts, "podcasts");
 		});
 		} catch (Exception e){
 			Debug.WriteLine("Error processing podcast data: " + e.Message);
