@@ -143,6 +143,22 @@
         </Grid>
     </Shell.FlyoutHeader>
 
+    <Shell.FlyoutFooter>
+        <StackLayout>
+            <Label Text="Settings"
+                TextColor="GhostWhite"
+                FontAttributes="Bold"
+                HorizontalOptions="End" 
+                Margin="10">
+
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding Settings_Clicked}" />
+                </Label.GestureRecognizers>
+
+            </Label>
+        </StackLayout>
+    </Shell.FlyoutFooter>
+
     <Shell.ItemTemplate>
         <DataTemplate>
             <Grid ColumnDefinitions="30,*" Padding="10">

@@ -57,23 +57,30 @@ public static class FeedsService
     public async static Task<Opml> ProcessOPMLFile(string destpath = "podcastlist.opml")
     {
         Console.WriteLine("Processing OPML File");
-
-		if (destpath == "podcastlist.opml"){
-			Debug.WriteLine("Using default OPML file");
-            destpath = Path.Combine(AppPaths.DataDirectory, destpath);
-
-            if (!File.Exists(destpath))
+		try
+		{
+            if (destpath == "podcastlist.opml")
             {
-                Console.WriteLine("Moving model to the right place");
-                using (var stream = await FileSystem.OpenAppPackageFileAsync("podcastlist.opml"))
+                Debug.WriteLine("Using default OPML file");
+                destpath = Path.Combine(AppPaths.DataDirectory, destpath);
+
+                if (!File.Exists(destpath))
                 {
-                    using (var destStream = File.Create(destpath))
+                    Console.WriteLine("Moving model to the right place");
+                    using (var stream = await FileSystem.OpenAppPackageFileAsync("podcastlist.opml"))
                     {
-                        await stream.CopyToAsync(destStream);
+                        using (var destStream = File.Create(destpath))
+                        {
+                            await stream.CopyToAsync(destStream);
+                        }
                     }
                 }
             }
+        } catch (Exception e)
+		{
+			Debug.WriteLine(e.Message);
 		}
+		
         return new Opml(destpath);
     }
 

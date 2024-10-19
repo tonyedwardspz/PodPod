@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Windows.Input;
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Maui.Core.Primitives;
 using CommunityToolkit.Maui.Views;
@@ -222,6 +223,11 @@ public partial class AppShell : Shell
         Debug.WriteLine($"Jumping to timestamp {timestamp}");
         PlayMedia(ep, playerState.Playlist, podcastTitle, timestamp);        
     }
+
+    public ICommand Settings_Clicked => new Command<string>(async (timestamp) => {
+		Debug.WriteLine($"Settings clicked");
+
+		// navigate to the settings page
+        await Shell.Current.GoToAsync($"{nameof(SettingsPage)}");
+	});
 }
-
-

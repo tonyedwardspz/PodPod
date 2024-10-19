@@ -6,7 +6,7 @@ namespace PodPod.Services;
 
 public class Data
 {
-    public static List<Podcast> podcasts { get; set; }
+    public static List<Podcast> podcasts { get; set; } = new List<Podcast>();
     public static List<Podcast> Podcasts {
          get => podcasts;
          set {
@@ -22,8 +22,6 @@ public class Data
         {
             Debug.WriteLine("Loading podcasts from file at init");
             Podcasts = LoadFromJsonFile<List<Podcast>>("podcasts");
-        } else {
-            Podcasts = new List<Podcast>();
         }
         AppPaths.InitDirectories();
     }
